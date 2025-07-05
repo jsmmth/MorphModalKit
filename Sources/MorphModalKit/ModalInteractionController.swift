@@ -35,7 +35,7 @@ final class ModalInteractionController: NSObject {
     private weak var delegate: ModalInteractionDelegate?
     private weak var boundScrollView: UIScrollView?
     private let dismissDistance: CGFloat = 300
-    private let parallaxFactor : CGFloat = 0.15
+    private let parallaxFactor : CGFloat = 0.08
     private lazy var sheetPan: UIPanGestureRecognizer = {
         let g = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
         g.delegate = self

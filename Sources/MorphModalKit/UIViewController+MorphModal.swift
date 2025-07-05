@@ -22,15 +22,14 @@ public extension UIViewController {
         animated: Bool = true,
         showsOverlay: Bool = true) {
             let host = ModalViewController()
-            addChild(host)
-            host.view.frame = view.bounds
-            view.addSubview(host.view)
-            host.didMove(toParent: self)
-
-            host.present(
-                root,
-                sticky: sticky,
-                animated: animated,
-                showsOverlay: showsOverlay)
+            host.modalPresentationStyle = .overFullScreen
+            host.modalTransitionStyle   = .crossDissolve
+            present(host, animated: false) {
+                host.present(
+                    root,
+                    sticky: sticky,
+                    animated: animated,
+                    showsOverlay: showsOverlay)
+            }
     }
 }

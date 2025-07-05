@@ -29,7 +29,7 @@ public enum ReplaceAnimation: Equatable {
 @MainActor
 public final class ModalViewController: UIViewController {
     public var horizontalInset: CGFloat = 10 /// Horizontal inset
-    public var cornerRadius: CGFloat = 30 /// Modal corner radius
+    public var cornerRadius: CGFloat = 32 /// Modal corner radius
     public var stackVerticalSpacing: CGFloat = 20 /// Vertical stack spacing between stack items
     public var dimBackgroundColor: UIColor = .black /// Background color of the dim view
     public var dimOpacityMultiplier: CGFloat = 0.06 /// Dim opacity
@@ -39,6 +39,7 @@ public final class ModalViewController: UIViewController {
     public var overlayOpacity: CGFloat = 0.2 /// Overlay opacity
     public var modalBackgroundColor: UIColor = .white /// Modal background color
     public var keyboardSpacing: CGFloat = 10 /// Space between the modal and the keyboard
+    public var usesSnapshots: Bool = true /// Whether or not the background stack views snapshot or not
     public var cornerMask: CACornerMask =
         [.layerMinXMinYCorner, .layerMaxXMinYCorner,
          .layerMinXMaxYCorner, .layerMaxXMaxYCorner] // default: all corners
@@ -403,6 +404,7 @@ public final class ModalViewController: UIViewController {
     /// view.  The live view is restored automatically when the card returns to the
     /// front (pop, swipe-back, …).
     private func updateSnapshots(newFront frontWrapper: UIView?) {
+        guard usesSnapshots else { return }
         for idx in 0..<containerStack.count {
             if containerStack[idx].wrapper === frontWrapper {
                 restoreLiveView(&containerStack[idx])

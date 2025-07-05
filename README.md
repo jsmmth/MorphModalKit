@@ -166,22 +166,23 @@ class  MorphHeaderSticky: StickyElementsContainer {
 
 ## Configuration
 
-|Property|Effect|
-|--|--|
-|`horizontalInset`|Side margins of every card|
-|`stackVerticalSpacing`| Gap between stacked cards|
-|`bottomSpacing`| Space from the bottom of the screen|
-|`keyboardSpacing`| Space between the modal and the keyboard|
-|`cornerRadius`| Card corner radius|
-|`cornerMask`| Card cornerMask settings|
-|`maxVisibleStack`|Max amount of cards to be shown in a stack|
-|`dimBackgroundColor`|Background color of the dimmed view|
-|`dimOpacityMultiplier`|Darkness of background cards|
-|`overlayOpacity`|Overlay opacity|
-|`overlayColor`|Color of the overlay|
-|`modalBackgroundColor`|Background of the base modal container|
-|`animation`|Allows you to adjust modal animation spring settings|
-|`cardShadow`|Allows you to adjust the shadow of modal cards|
+|Property|Effect|Default|
+|--|--|--|
+|`horizontalInset`|Side margins of every card|`10`|
+|`stackVerticalSpacing`| Gap between stacked cards|`20`|
+|`bottomSpacing`| Space from the bottom of the screen|`nil (safeAreaBottom + 10)`|
+|`keyboardSpacing`| Space between the modal and the keyboard|`10`|
+|`cornerRadius`| Card corner radius|`32`|
+|`cornerMask`| Card cornerMask settings|`[.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner]`|
+|`maxVisibleStack`|Max amount of cards to be shown in a stack|`2`|
+|`dimBackgroundColor`|Background color of the dimmed view|`.black`|
+|`dimOpacityMultiplier`|Darkness of background cards|`0.06`|
+|`overlayOpacity`|Overlay opacity|`0.2`|
+|`overlayColor`|Color of the overlay|`.black`|
+|`modalBackgroundColor`|Background of the base modal container|`.white`|
+|`animation`|Allows you to adjust modal animation spring settings|`ModalAnimationSettings(duration: 0.4, damping: 0.86, velocity: 0.8)`|
+|`cardShadow`|Allows you to adjust the shadow of modal cards|`(.black, 0.12, 9, .init(width: 0, height: 2))`|
+|`usesSnapshots`|Whether or not the background stacks snapshot|`true`|
 
 ### Example:
 
