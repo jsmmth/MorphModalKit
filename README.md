@@ -217,7 +217,7 @@ You can still call `modalVC.pop()` programmatically.
 
 ##  Full Example
 
-See [`Examples/UIKitExample/ExampleModalFlow.swift`](./UIKitExample/ExampleModalFlow.swift)
+See [`Examples/UIKitExample/UIKitExample/ExampleView.swift`](./Examples/UIKitExample/UIKitExample/ExampleView.swift)
 for a working demo that includes:
 
 * ****MenuModal**** → pushes multiple cards.
