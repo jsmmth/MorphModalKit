@@ -73,7 +73,7 @@ modalVC.push(ScrollPage(), sticky: nil)
 >```swift
 >extension  UIViewController {
 >    var modalVC: ModalViewController? {
->        sequence(first: parent) { $0?.parent }.first { $0 **is**  ModalViewController } as? ModalViewController
+>        sequence(first: parent) { $0?.parent }.first { $0 is  ModalViewController } as? ModalViewController
 >    }
 >}
 
