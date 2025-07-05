@@ -65,7 +65,7 @@ Pushing to the modalVC allows you to create a classing navigation stack. The pre
   
 ```swift
 
-modalVC.push(ScrollPage(), sticky: nil)
+modalVC.push(ModalView(), sticky: nil)
 
 ```
 
