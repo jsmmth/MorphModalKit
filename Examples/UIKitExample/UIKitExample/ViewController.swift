@@ -35,16 +35,32 @@ private extension UIButton {
 class ViewController: UIViewController {
     private let host = ModalViewController()
     private let presentButton = UIButton.sampleButton(title: "MorphModalKit")
+    private let icon: UIImageView = {
+        let view = UIImageView()
+        view.contentMode = .scaleAspectFit
+        view.image = UIImage(named: "icon")
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     override func viewDidLoad() {
         view.backgroundColor = .white
-        presentButton.addTarget(self, action: #selector(onPresentPress), for: .touchUpInside)
+        
+        view.addSubview(icon)
         view.addSubview(presentButton)
+        
         presentButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             presentButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            presentButton.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            presentButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
+            icon.widthAnchor.constraint(equalToConstant: 60),
+            icon.heightAnchor.constraint(equalToConstant: 60),
+            icon.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            icon.bottomAnchor.constraint(equalTo: presentButton.topAnchor, constant: -16),
         ])
+        
+        presentButton.addTarget(self, action: #selector(onPresentPress), for: .touchUpInside)
     }
     
     @objc private func onPresentPress() {
