@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:Examples/UIKitExample/UIKitExample.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Package.swift">
+   </FileRef>
+   <FileRef
+      location = "group:README.md">
+   </FileRef>
+   <Group
+      location = "group:Sources"
+      name = "Sources">
+      <Group
+         location = "group:MorphModalKit"
+         name = "MorphModalKit">
+         <FileRef
+            location = "group:StickyElementsContainer.swift">
+         </FileRef>
+         <FileRef
+            location = "group:UIViewController+MorphModal.swift">
+         </FileRef>
+         <FileRef
+            location = "group:ModalViewController.swift">
+         </FileRef>
+         <FileRef
+            location = "group:ModalView.swift">
+         </FileRef>
+         <FileRef
+            location = "group:ModalInteractionController.swift">
+         </FileRef>
+      </Group>
+   </Group>
+</Workspace>

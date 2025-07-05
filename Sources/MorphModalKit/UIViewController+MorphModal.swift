@@ -1,0 +1,36 @@
+//
+//  UIViewController+MorphModal.swift
+//  
+//
+//  Created by Joseph Smith on 05/07/2025.
+//
+
+import UIKit
+
+public extension UIViewController {
+    /// Presents a root modal stack using `DialogViewController` as the host.
+    ///
+    /// - Parameters:
+    ///   - root: The root `DialogView` to show.
+    ///   - sticky: Optional sticky elements that remain visible while replacing content (morphing). Defaults to `nil`.
+    ///   - animated: Whether to animate the presentation. Defaults to `true`.
+    ///   - showsOverlay: Whether to show the dimmed background overlay. Defaults to `true`.
+    ///   - dismissable: Whether the modal can be dismissed. Defaults to `true`.
+    func presentModal(
+        _ root: ModalView,
+        sticky: StickyElementsContainer? = nil,
+        animated: Bool = true,
+        showsOverlay: Bool = true) {
+            let host = ModalViewController()
+            addChild(host)
+            host.view.frame = view.bounds
+            view.addSubview(host.view)
+            host.didMove(toParent: self)
+
+            host.present(
+                root,
+                sticky: sticky,
+                animated: animated,
+                showsOverlay: showsOverlay)
+    }
+}
