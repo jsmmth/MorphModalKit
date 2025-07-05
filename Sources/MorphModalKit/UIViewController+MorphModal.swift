@@ -22,6 +22,11 @@ public extension UIViewController {
         animated: Bool = true,
         showsOverlay: Bool = true) {
             let host = ModalViewController()
+            
+            host.bottomSpacing = 0
+            host.horizontalInset = 0
+            host.cornerMask = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+            
             host.modalPresentationStyle = .overFullScreen
             host.modalTransitionStyle   = .crossDissolve
             present(host, animated: false) {

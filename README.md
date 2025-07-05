@@ -122,7 +122,7 @@ When making a `StickyElementsContainer` it should conform to the UIView and when
 ### Quick implementation example
 
 ```swift
-class  MorphHeaderSticky: StickyElementsContainer {
+class StickyElements: StickyElementsContainer {
     private  weak  var current: ModalView?
     private  let  back = UIButton(configuration: .plain())
     private  let  nextBtn = UIButton(configuration: .plain())
