@@ -2,10 +2,13 @@
 
 ✨ This is a small swift package built for UIKit for achieving a morphable and stackable modal system. I've tried to make this as extendable as possible but it's likely going to have a few weird cases. It's not perfect but hopefully helps as a starting point.
 
+## Getting Started
+MorphModalKit is distributed as a Swift package. There are ****two**** easy ways to add it to your project:
+
 ### 1. Swift Package Manager
 
 1. In ****Xcode**** choose ****File › Add Packages…****
-2. Paste the repository URL: ```https://github.com/<your-org>/MorphModalKit.git```
+2. Paste the repository URL: ```https://github.com/jsmmth/MorphModalKit.git```
 3. press **Add Package**
 4. Pick the Xcode targets that should link against **MorphModalKit** and finish the wizard.
 
