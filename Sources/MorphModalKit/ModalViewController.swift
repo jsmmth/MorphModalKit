@@ -31,6 +31,7 @@ public final class ModalViewController: UIViewController {
     public var horizontalInset: CGFloat = 10 /// Horizontal inset
     public var cornerRadius: CGFloat = 30 /// Modal corner radius
     public var stackVerticalSpacing: CGFloat = 20 /// Vertical stack spacing between stack items
+    public var dimBackgroundColor: UIColor = .black /// Background color of the dim view
     public var dimOpacityMultiplier: CGFloat = 0.06 /// Dim opacity
     public var maxVisibleStack: Int = 2 /// How many items can a stack show
     public var removesSelfWhenCleared: Bool = true /// When `true` (default) the controller detaches itself from its parent
@@ -190,7 +191,7 @@ public final class ModalViewController: UIViewController {
         addChild(modal)
         modal.view.translatesAutoresizingMaskIntoConstraints = false
         modal.view.alpha = 0
-        card.insertSubview(modal.view, belowSubview: c.dimView)
+        card.addSubview(modal.view)
         NSLayoutConstraint.activate([
             modal.view.leadingAnchor.constraint(equalTo: card.leadingAnchor),
             modal.view.trailingAnchor.constraint(equalTo: card.trailingAnchor),
@@ -213,8 +214,8 @@ public final class ModalViewController: UIViewController {
             snap.transform = .identity
         default:
             modal.view.transform = direction == .forward
-                ? .init(scaleX: 1.10, y: 1.10)
-                : .init(scaleX: 0.92, y: 0.92)
+                ? .init(scaleX: 1.05, y: 1.05)
+                : .init(scaleX: 0.98, y: 0.98)
         }
     
         animate(animated) { [weak self] in
@@ -231,8 +232,8 @@ public final class ModalViewController: UIViewController {
             default:
                 modal.view.transform = .identity
                 snap.transform = direction == .forward
-                    ? .init(scaleX: 0.92, y: 0.92)
-                    : .init(scaleX: 1.10, y: 1.10)
+                    ? .init(scaleX: 0.98, y: 0.98)
+                    : .init(scaleX: 1.05, y: 1.05)
             }
             self.applyPeekTransforms(animated: true)
             self.notifyStickyOwnerChange(old: outgoing, animated: false)
@@ -574,19 +575,20 @@ public final class ModalViewController: UIViewController {
 
         // dim overlay
         let dim = UIView(frame: card.bounds)
-        dim.backgroundColor        = .black
-        dim.alpha                  = 0
-        dim.autoresizingMask       = [.flexibleWidth, .flexibleHeight]
+        dim.backgroundColor = dimBackgroundColor
+        dim.alpha = 0
         dim.isUserInteractionEnabled = false
-        card.addSubview(dim)
+        dim.layer.cornerRadius  = cornerRadius
+        dim.layer.maskedCorners = cornerMask
+        dim.clipsToBounds       = true
+        wrapper.addSubview(dim)
         dim.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            dim.leadingAnchor.constraint(equalTo: card.leadingAnchor),
-            dim.trailingAnchor.constraint(equalTo: card.trailingAnchor),
-            dim.topAnchor.constraint(equalTo: card.topAnchor),
-            dim.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+            dim.leadingAnchor.constraint(equalTo: wrapper.leadingAnchor),
+            dim.trailingAnchor.constraint(equalTo: wrapper.trailingAnchor),
+            dim.topAnchor.constraint(equalTo: wrapper.topAnchor),
+            dim.bottomAnchor.constraint(equalTo: wrapper.bottomAnchor)
         ])
-        
 
         return Container(wrapper: wrapper,
                          card:    card,

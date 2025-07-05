@@ -175,6 +175,7 @@ class  MorphHeaderSticky: StickyElementsContainer {
 |`cornerRadius`| Card corner radius|
 |`cornerMask`| Card cornerMask settings|
 |`maxVisibleStack`|Max amount of cards to be shown in a stack|
+|`dimBackgroundColor`|Background color of the dimmed view|
 |`dimOpacityMultiplier`|Darkness of background cards|
 |`overlayOpacity`|Overlay opacity|
 |`overlayColor`|Color of the overlay|

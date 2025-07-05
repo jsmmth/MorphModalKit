@@ -17,13 +17,39 @@ private extension UIView {
 }
 
 final class CenterColumn: UIStackView {
-    init(spacing: CGFloat = 24) {
+    init(spacing: CGFloat = 8, align: UIStackView.Alignment = .fill) {
         super.init(frame: .zero)
-        axis = .vertical; alignment = .center; distribution = .equalSpacing
+        axis = .vertical
+        alignment = align
+        distribution = .equalSpacing
         self.spacing = spacing
         translatesAutoresizingMaskIntoConstraints = false
     }
     required init(coder: NSCoder) { fatalError() }
+}
+
+extension UIButton {
+    static func styled(
+        title: String,
+        bgColor: UIColor = .black,
+        fgColor: UIColor = .white,
+        cornerRadius: CGFloat = 16,
+        height: CGFloat = 48
+    ) -> UIButton {
+        var config = UIButton.Configuration.filled()
+        config.title = title
+        config.baseBackgroundColor = bgColor
+        config.baseForegroundColor = fgColor
+        config.contentInsets = .init(top: 0, leading: 0, bottom: 0, trailing: 0)
+
+        let button = UIButton(configuration: config)
+        button.layer.cornerRadius = cornerRadius
+        button.layer.cornerCurve = .continuous
+        button.clipsToBounds = true
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.heightAnchor.constraint(equalToConstant: height).isActive = true
+        return button
+    }
 }
 
 private extension UIButton {
@@ -40,34 +66,44 @@ extension UIViewController {
     }
 }
 
-class MorphHeaderSticky: StickyElementsContainer {
-    private weak var current: MorphPage?
+class StickyElements: StickyElementsContainer {
+    private weak var current: MorphModal?
     private let back = UIButton(configuration: .plain())
-    private let nextBtn = UIButton(configuration: .plain())
+    private let nextBtn = UIButton.styled(title: "Next")
+    private let handlebar = UIView()
 
     override init(frame: CGRect = .zero) {
         super.init(frame: frame)
-
+        
+        handlebar.backgroundColor = .systemGray6
+        handlebar.layer.cornerCurve = .continuous
+        handlebar.layer.cornerRadius = 2
+        
         back.configuration?.title = "← Back"
         back.tintColor = .black
         back.addTarget(self, action: #selector(onBack), for: .touchUpInside)
-
-        nextBtn.tintColor = .black
         nextBtn.addTarget(self, action: #selector(onNext), for: .touchUpInside)
 
-        addEmbedded(back, nextBtn)
+        addEmbedded(back, nextBtn, handlebar)
         NSLayoutConstraint.activate([
+            handlebar.widthAnchor.constraint(equalToConstant: 44),
+            handlebar.heightAnchor.constraint(equalToConstant: 4),
+            handlebar.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            handlebar.centerXAnchor.constraint(equalTo: centerXAnchor),
+            
             back.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
             back.topAnchor.constraint(equalTo: topAnchor, constant: 12),
-            nextBtn.centerXAnchor.constraint(equalTo: centerXAnchor),
-            nextBtn.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12)
+            
+            nextBtn.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            nextBtn.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            nextBtn.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16)
         ])
     }
     required init?(coder: NSCoder) { fatalError() }
 
     // show only for Morph pages
     override func contextDidChange(to newOwner: ModalView, from _: ModalView?, animated: Bool) {
-        current = newOwner as? MorphPage
+        current = newOwner as? MorphModal
         let visible = current != nil
         nextBtn.setTitle((current?.step == .three) ? "Done ✓" : "Next →", for: .normal)
         let update = { self.back.alpha = visible ? 1 : 0; self.nextBtn.alpha = visible ? 1 : 0 }
@@ -78,38 +114,41 @@ class MorphHeaderSticky: StickyElementsContainer {
         guard let page = current, let host = wrapper?.owningVC as? ModalViewController else { return }
         switch page.step {
         case .one:   host.replace(with: MenuModal(),           direction: .backward)
-        case .two:   host.replace(with: MorphPage(step: .one), direction: .backward)
-        case .three: host.replace(with: MorphPage(step: .two), direction: .backward)
+        case .two:   host.replace(with: MorphModal(step: .one), direction: .backward)
+        case .three: host.replace(with: MorphModal(step: .two), direction: .backward)
         }
     }
 
     @objc private func onNext() {
         guard let page = current, let host = wrapper?.owningVC as? ModalViewController else { return }
         switch page.step {
-        case .one:   host.replace(with: MorphPage(step: .two),   direction: .forward)
-        case .two:   host.replace(with: MorphPage(step: .three), direction: .forward)
+        case .one:   host.replace(with: MorphModal(step: .two),   direction: .forward)
+        case .two:   host.replace(with: MorphModal(step: .three), direction: .forward)
         case .three: host.replace(with: MenuModal(),             direction: .forward)
         }
     }
 }
 
 final class MenuModal: UIViewController, ModalView {
-    private let stackBtn = UIButton("Push stack")
-    private let morphBtn = UIButton("Morph flow →")
-    private let inputBtn = UIButton("Text input")
-    private let listBtn  = UIButton("Scrollable list")
+    private let stackBtn = UIButton.styled(title: "Push")
+    private let popBtn = UIButton.styled(title: "Pop")
+    private let morphBtn = UIButton.styled(title: "Replace (Morph)")
+    private let inputBtn = UIButton.styled(title: "Input")
+    private let listBtn  = UIButton.styled(title: "Scroll View")
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         let col = CenterColumn()
-        [stackBtn, morphBtn, inputBtn, listBtn].forEach(col.addArrangedSubview)
+        [stackBtn, popBtn, morphBtn, inputBtn, listBtn].forEach(col.addArrangedSubview)
         view.addEmbedded(col)
         NSLayoutConstraint.activate([
-            col.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            col.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            col.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             col.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
 
+        popBtn.addTarget(self, action: #selector(popModal), for: .touchUpInside)
         stackBtn.addTarget(self, action: #selector(pushAnotherMenu), for: .touchUpInside)
         morphBtn.addTarget(self, action: #selector(openMorph),       for: .touchUpInside)
         inputBtn.addTarget(self, action: #selector(openInput),       for: .touchUpInside)
@@ -117,22 +156,19 @@ final class MenuModal: UIViewController, ModalView {
     }
 
     // MARK: navigation
-    @objc private func pushAnotherMenu() { modalHost?.push(MenuModal(), sticky: MorphHeaderSticky()) }
-
-    @objc private func openMorph() {
-        modalHost?.replace(with: MorphPage(step: .one))
-    }
-
-    @objc private func openInput() { modalHost?.push(InputPage()) }
-    @objc private func openList()  { modalHost?.push(ScrollPage()) }
-
+    @objc private func pushAnotherMenu() { modalHost?.push(MenuModal(), sticky: StickyElements()) }
+    @objc private func popModal() { modalHost?.pop() }
+    @objc private func openMorph() { modalHost?.replace(with: MorphModal(step: .one)) }
+    @objc private func openInput() { modalHost?.push(InputModal(), sticky: StickyElements()) }
+    @objc private func openList()  { modalHost?.push(ScrollModal(), sticky: StickyElements()) }
     func preferredHeight(for _: CGFloat) -> CGFloat { 320 }
 }
 
 enum MorphStep: Int { case one = 1, two, three }
-final class MorphPage: UIViewController, ModalView {
-
+final class MorphModal: UIViewController, ModalView {
     let step: MorphStep
+    private let morphContainer = UIView()
+    
     init(step: MorphStep) { self.step = step; super.init(nibName: nil, bundle: nil) }
     required init?(coder: NSCoder) { fatalError() }
 
@@ -140,14 +176,24 @@ final class MorphPage: UIViewController, ModalView {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        morphContainer.backgroundColor = .systemGray6
+        morphContainer.layer.cornerCurve = .continuous
+        morphContainer.layer.cornerRadius = 16
+        
         titleLbl.font = .preferredFont(forTextStyle: .largeTitle)
         titleLbl.textAlignment = .center
-
-        view.addEmbedded(titleLbl)
+        
+        view.addEmbedded(morphContainer)
+        morphContainer.addEmbedded(titleLbl)
         NSLayoutConstraint.activate([
-            titleLbl.topAnchor.constraint(equalTo: view.topAnchor, constant: 60),
-            titleLbl.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            morphContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            morphContainer.topAnchor.constraint(equalTo: view.topAnchor, constant: 48),
+            morphContainer.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -70),
+            morphContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            titleLbl.centerYAnchor.constraint(equalTo: morphContainer.centerYAnchor),
+            titleLbl.centerXAnchor.constraint(equalTo: morphContainer.centerXAnchor)
         ])
+        
         titleLbl.text = "Morph \(step.rawValue)"
     }
 
@@ -156,8 +202,7 @@ final class MorphPage: UIViewController, ModalView {
     }
 }
 
-final class ScrollPage: UIViewController, ModalView {
-
+final class ScrollModal: UIViewController, ModalView {
     private let scroll = UIScrollView()
     private let stack  = UIStackView()
     var dismissalHandlingScrollView: UIScrollView? { scroll }
@@ -197,7 +242,7 @@ final class ScrollPage: UIViewController, ModalView {
     func preferredHeight(for _: CGFloat) -> CGFloat { 500 }
 }
 
-final class InputPage: UIViewController, ModalView {
+final class InputModal: UIViewController, ModalView {
 
     private let tf = UITextField()
 
@@ -213,7 +258,7 @@ final class InputPage: UIViewController, ModalView {
         tf.borderStyle = .roundedRect
         tf.placeholder = "Type something…"
 
-        let col = CenterColumn(spacing: 16)
+        let col = CenterColumn(spacing: 16, align: .center)
         col.addArrangedSubview(tip)
         col.addArrangedSubview(tf)
 

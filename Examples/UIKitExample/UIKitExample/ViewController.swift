@@ -27,7 +27,7 @@ class ViewController: UIViewController {
     }
     
     @objc private func onPresentPress() {
-        self.presentModal(MenuModal(), sticky: MorphHeaderSticky())
+        self.presentModal(MenuModal(), sticky: StickyElements())
     }
 }
 
