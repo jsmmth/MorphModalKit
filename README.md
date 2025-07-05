@@ -53,7 +53,7 @@ class ExampleModal: UIViewController, ModalView {
 
 ```
 
-  
+> ****Tip:**** The `preferredHeight` can never extend the device height. It'll animate smoothly to fit within the screen. Helpful for large modals with keyboard presenting views.
 
 > ****Tip:**** Return `dismissalHandlingScrollView` when your modal contains a nested `UIScrollView` (or subclass) whose *_top‑bounce_* should trigger dismissal instead of overscroll.
 
