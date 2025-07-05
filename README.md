@@ -53,7 +53,7 @@ presentModal(ModalView, animated: Bool = true, showsOverlay: Bool = true)
 >****Tip:**** The present call has an optional `sticky` param which allows you to pass `StickyElementsContainer`  which overlays and survives every *_replace_* operation (a.k.a. morph). Helpful for creating sticky elements across morphs.
 
   ```swift
-presentModal(ModalView(), sticky: StickyElementsContainer)
+presentModal(ModalView(), sticky: StickyElementsContainer.Type?)
 ```
 
 ## Modal View
@@ -63,9 +63,9 @@ When making a modal view you should conform your `UIViewController` to `ModalVie
 ```swift
 
 protocol ModalView: UIViewController {
-    func preferredHeight(for width: CGFloat) -> CGFloat  // sizing
-    var  canDismiss: Bool { get }  // pull‑down?
-    var  dismissalHandlingScrollView: UIScrollView? { get }  // nested scroll view
+    func preferredHeight(for width: CGFloat) -> CGFloat  // Preferred Sizing
+    var  canDismiss: Bool { get }  // Dismissable
+    var  dismissalHandlingScrollView: UIScrollView? { get }  // Nested scroll view for dismissal
 
     // life‑cycle (all optional)
     func modalWillAppear()
@@ -105,17 +105,21 @@ Pushing to the modalVC allows you to create a classing navigation stack. The pre
   
 ```swift
 
-modalVC.push(ModalView(), sticky: nil)
+modalVC.push(ModalView(), sticky: StickyElementsContainer.Type?)
 
 ```
 
 >****Tip:**** I find it helpful to have an extension which makes it easier to find the root ModalViewController.
->```swift
->extension  UIViewController {
->    var modalVC: ModalViewController? {
->        sequence(first: parent) { $0?.parent }.first { $0 is  ModalViewController } as? ModalViewController
->    }
->}
+```swift
+import UIKit
+import MorphModalKit
+
+extension UIViewController {
+   var modalVC: ModalViewController? {
+       sequence(first: parent) { $0?.parent }.first { $0 is  ModalViewController } as? ModalViewController
+   }
+}
+```
 
   
 
@@ -164,45 +168,24 @@ When making a `StickyElementsContainer` it should conform to the UIView and when
 ```swift
 class StickyElements: StickyElementsContainer {
     private  weak  var current: ModalView?
-    private  let  back = UIButton(configuration: .plain())
-    private  let  nextBtn = UIButton(configuration: .plain())
 
-    override init(frame: CGRect = .zero) {
-        super.init(frame: frame)
-        back.configuration?.title = "← Back"
-        back.tintColor = .black
-        back.addTarget(self, action: #selector(onBack), for: .touchUpInside)
-
-        nextBtn.tintColor = .black
-        nextBtn.addTarget(self, action: #selector(onNext), for: .touchUpInside)
-        
-        [back, nextBtn].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            addSubview($0)
-        }
-
-        NSLayoutConstraint.activate([
-            back.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
-            back.topAnchor.constraint(equalTo: topAnchor, constant: 12),
-            nextBtn.centerXAnchor.constraint(equalTo: centerXAnchor),
-            nextBtn.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12)
-        ])
+    required init(modalVC: ModalViewController) {
+        super.init(modalVC: modalVC)
+        // Layout views
     }
 
     required init?(coder: NSCoder) { fatalError() }
     
     // Called when ever content is replaced
-    override func contextDidChange(to newOwner: ModalView, from _: ModalView?, animated: Bool) {
-        current = newOwner as? MorphView
+    override func contextDidChange(to newOwner: ModalView, from oldOwner: ModalView?, animated: Bool) {
         // Could to some contextual animation or content change based on view
     }
-
-    @objc  private  func  onBack() {}
-    @objc  private  func  onNext() {}
 }
 ```
 
-> ****Important:**** `StickyElementsContainer` already forwards touches ****through**** itself, but not through its interactive sub‑views.
+You'll then need to attach the StickyElements when you `push` or `present` with `modalVC.push(ModalView(), sticky: StickyElements.self)`
+
+> ****Important:**** `StickyElementsContainer` already forwards touches ****through**** itself, but not through its interactive sub‑views. It also has access to `modalVC` from within the view.
 
 ## Configuration
 
@@ -219,8 +202,9 @@ class StickyElements: StickyElementsContainer {
 |`dimOpacityMultiplier`|Darkness of background cards|`0.06`|
 |`overlayOpacity`|Overlay opacity|`0.2`|
 |`overlayColor`|Color of the overlay|`.black`|
-|`modalBackgroundColor`|Background of the base modal container|`.white`|
+|`modalBackgroundColor`|Background of the base modal container|`.systemBackground`|
 |`animation`|Allows you to adjust modal animation spring settings|`ModalAnimationSettings(duration: 0.4, damping: 0.86, velocity: 0.8)`|
+|`morphAnimation`|Allows you to adjust animation spring settings for morph animations|`ModalAnimationSettings(duration: 0.3, damping: 0.95, velocity: 1)`|
 |`cardShadow`|Allows you to adjust the shadow of modal cards|`(.black, 0.12, 9, .init(width: 0, height: 2))`|
 |`usesSnapshots`|Whether or not the background stacks snapshot|`true`|
 

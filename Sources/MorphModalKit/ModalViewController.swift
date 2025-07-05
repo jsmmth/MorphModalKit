@@ -37,7 +37,7 @@ public final class ModalViewController: UIViewController {
     public var removesSelfWhenCleared: Bool = true /// When `true` (default) the controller detaches itself from its parent
     public var overlayColor: UIColor = .black /// Backdrop color
     public var overlayOpacity: CGFloat = 0.2 /// Overlay opacity
-    public var modalBackgroundColor: UIColor = .white /// Modal background color
+    public var modalBackgroundColor: UIColor = .systemBackground /// Modal background color
     public var keyboardSpacing: CGFloat = 10 /// Space between the modal and the keyboard
     public var usesSnapshots: Bool = true /// Whether or not the background stack views snapshot or not
     public var cornerMask: CACornerMask =
@@ -45,6 +45,7 @@ public final class ModalViewController: UIViewController {
          .layerMinXMaxYCorner, .layerMaxXMaxYCorner] // default: all corners
     public var bottomSpacing: CGFloat? = nil // nil -> auto = max(safe-area,10)
     public var animation = ModalAnimationSettings()
+    public var morphAnimation = ModalAnimationSettings(duration: 0.3, damping: 0.95, velocity: 1)
     /// Shadow for every modal “card”.
     /// - color:   CALayer.shadowColor
     /// - opacity: CALayer.shadowOpacity (0–1)
@@ -65,7 +66,7 @@ public final class ModalViewController: UIViewController {
     ///   - completion: An optional closure to be called after presentation completes.
     public func present(
         _ modal:ModalView,
-        sticky: StickyElementsContainer? = nil,
+        sticky: StickyElementsContainer.Type? = nil,
         animated:Bool = true,
         showsOverlay:Bool = true,
         completion:(()->Void)? = nil) {
@@ -94,7 +95,7 @@ public final class ModalViewController: UIViewController {
     ///   - completion: An optional closure to be called after presentation completes.
     public func push(
         _ modal:ModalView,
-        sticky: StickyElementsContainer? = nil,
+        sticky: StickyElementsContainer.Type? = nil,
         animated:Bool = true,
         completion:(()->Void)? = nil)
     {
@@ -118,7 +119,7 @@ public final class ModalViewController: UIViewController {
         let previous = containerStack.dropLast().last?.modalView
         notifyStickyOwnerChange(old: previous, animated: false)
         modal.modalWillAppear()
-        animate(animated) {
+        animate(animation, animated) {
             self.overlay.alpha = self.overlayEnabled ? self.overlayOpacity : 0
             self.layoutAll()
             c.wrapper.transform = .identity
@@ -149,7 +150,7 @@ public final class ModalViewController: UIViewController {
         next.modalView.modalWillAppear()
         restoreLiveView(&containerStack[containerStack.count-2])// next
         
-        animate(animated) {
+        animate(animation, animated) {
             removing.wrapper.transform = slide
             self.applyPeekTransforms(animated:true, excluding: removing.wrapper)
         } completion:{
@@ -219,7 +220,7 @@ public final class ModalViewController: UIViewController {
                 : .init(scaleX: 0.98, y: 0.98)
         }
     
-        animate(animated) { [weak self] in
+        animate(morphAnimation, animated) { [weak self] in
             guard let self else { return }
             self.layout(&c)
             snap.alpha = 0
@@ -255,7 +256,7 @@ public final class ModalViewController: UIViewController {
     ///   - completion: An optional closure to be called after presentation completes.
     public func hide(animated:Bool = true, completion:(()->Void)? = nil) {
         containerStack.forEach{ $0.modalView.modalWillDisappear() }
-        animate(animated) {
+        animate(animation, animated) {
             self.overlay.alpha = 0
             self.containerStack.forEach{
                 let dist = self.view.bounds.maxY - $0.wrapper.frame.minY + 50
@@ -491,6 +492,7 @@ public final class ModalViewController: UIViewController {
     }
 
     private func animate(
+        _ animation: ModalAnimationSettings,
         _ on:Bool,
         _ block:@escaping()->Void,
         completion:(()->Void)? = nil){
@@ -499,11 +501,10 @@ public final class ModalViewController: UIViewController {
                 completion?()
                 return
             }
-            let s = animation
-            UIView.animate(withDuration: s.duration,
+            UIView.animate(withDuration: animation.duration,
                            delay: 0,
-                           usingSpringWithDamping: s.damping,
-                           initialSpringVelocity: s.velocity,
+                           usingSpringWithDamping: animation.damping,
+                           initialSpringVelocity: animation.velocity,
                            options:[.allowUserInteraction,.beginFromCurrentState],
                            animations: block){ _ in completion?() }
     }
@@ -518,31 +519,28 @@ public final class ModalViewController: UIViewController {
         updateHitTesting()
         
         guard removesSelfWhenCleared else { return }
-
-       willMove(toParent: nil)
-       view.removeFromSuperview()
-       removeFromParent()
+        self.dismiss(animated: false)
     }
 
-    private func makeContainer(for modal: ModalView, sticky explicit: StickyElementsContainer?) -> Container {
+    private func makeContainer(for modal: ModalView, sticky explicit: StickyElementsContainer.Type?) -> Container {
         addChild(modal)
         
         let wrapper = UIView()
         wrapper.layer.cornerRadius = cornerRadius
         let s = cardShadow
-        wrapper.layer.shadowColor   = s.color.cgColor
+        wrapper.layer.shadowColor = s.color.cgColor
         wrapper.layer.shadowOpacity = s.opacity
-        wrapper.layer.shadowRadius  = s.radius
-        wrapper.layer.shadowOffset  = s.offset
+        wrapper.layer.shadowRadius = s.radius
+        wrapper.layer.shadowOffset = s.offset
         wrapper.layer.maskedCorners = cornerMask
         wrapper.clipsToBounds = false
         wrapper.backgroundColor = modalBackgroundColor
 
         // card (clips content)
         let card = UIView()
-        card.layer.cornerRadius  = cornerRadius
+        card.layer.cornerRadius = cornerRadius
         card.layer.maskedCorners = cornerMask
-        card.clipsToBounds       = true
+        card.clipsToBounds = true
         wrapper.addSubview(card)
         card.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -553,8 +551,11 @@ public final class ModalViewController: UIViewController {
         ])
         
         // sticky elements
-        let sticky = explicit ?? StickyElementsContainer()
+        let sticky = (explicit != nil) ? explicit!.init(modalVC: self) : StickyElementsContainer(modalVC: self)
         sticky.wrapper = wrapper
+        sticky.layer.cornerRadius = cornerRadius
+        sticky.layer.maskedCorners = cornerMask
+        sticky.clipsToBounds = true
         wrapper.addSubview(sticky)
         sticky.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([

@@ -11,9 +11,11 @@ import UIKit
 open class StickyElementsContainer: UIView {
     public weak var wrapper: UIView?
     public let safeArea = UILayoutGuide()
+    public let modalVC: ModalViewController
     
-    public override init(frame: CGRect = .zero) {
-        super.init(frame: frame)
+    public required init(modalVC: ModalViewController) {
+        self.modalVC = modalVC
+        super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         addLayoutGuide(safeArea)
         NSLayoutConstraint.activate([
@@ -24,7 +26,9 @@ open class StickyElementsContainer: UIView {
         ])
     }
     
-    required public init?(coder: NSCoder) { fatalError() }
+    required public init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     public override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         let hit = super.hitTest(point, with: event)
