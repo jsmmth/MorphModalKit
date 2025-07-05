@@ -200,7 +200,11 @@ modalVC.stackVerticalSpacing = 16
 
 ### Snapshots & Performance
 
-`ModalViewController` converts all *_background_* cards into static snapshots to keep the render loop silky‑smooth. The live view is restored automatically when the card becomes front‑most.
+`ModalViewController` converts all *_background_* cards into static snapshots to keep the render loop silky‑smooth. The live view is restored automatically when the card becomes front‑most. You can disable this with `usesSnapshots` property if you want background cards to remain active.
+
+### Height adjusting
+
+All `ModalView` views have a `preferredHeight` value to which it will attempt to stick to. Although if there is a situation where there is not enough room on the device it will shrink the modal to ensure there is enough space to show the content. Be mindful of this when creating modal content with inputs where the keyboard will reduce the amount of available space. You may need to wrap your content in a UIScrollView and use the `dismissalHandlingScrollView`.
 
 ### Keyboard avoidance
 
