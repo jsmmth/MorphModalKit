@@ -113,7 +113,7 @@ class StickyElements: StickyElementsContainer {
     @objc private func onBack() {
         guard let page = current, let host = wrapper?.owningVC as? ModalViewController else { return }
         switch page.step {
-        case .one:   host.replace(with: MenuModal(),           direction: .backward)
+        case .one:   host.replace(with: MenuModal(), direction: .backward)
         case .two:   host.replace(with: MorphModal(step: .one), direction: .backward)
         case .three: host.replace(with: MorphModal(step: .two), direction: .backward)
         }
@@ -122,9 +122,9 @@ class StickyElements: StickyElementsContainer {
     @objc private func onNext() {
         guard let page = current, let host = wrapper?.owningVC as? ModalViewController else { return }
         switch page.step {
-        case .one:   host.replace(with: MorphModal(step: .two),   direction: .forward)
+        case .one:   host.replace(with: MorphModal(step: .two), direction: .forward)
         case .two:   host.replace(with: MorphModal(step: .three), direction: .forward)
-        case .three: host.replace(with: MenuModal(),             direction: .forward)
+        case .three: host.replace(with: MenuModal(), direction: .forward)
         }
     }
 }
