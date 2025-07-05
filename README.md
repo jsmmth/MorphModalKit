@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="100%" src="https://raw.githubusercontent.com/jsmmth/MorphModalKit/main/banner.png" alt="MorphModalKit">
+  <img width="100%" src="./banner.png" alt="MorphModalKit">
 </p>
 
 ## Getting Started
