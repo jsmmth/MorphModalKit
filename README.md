@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="100%" src="https://raw.githubusercontent.com/jsmmth/MorphModalKit/main/banner.png" alt="MorphModalKit">
+  <img width="100%" src="./banner.png" alt="MorphModalKit">
 </p>
 
 ## Getting Started
@@ -247,7 +247,7 @@ You can still call `modalVC.pop()` programmatically.
 
 ##  Full Example
 
-See [`Examples/UIKitExample/UIKitExample/ExampleView.swift`](./Examples/UIKitExample/UIKitExample/ExampleView.swift)
+See [`Examples/UIKitExample/UIKitExample/Modals`](./Examples/UIKitExample/UIKitExample/Modals)
 for a working demo that includes:
 
 * ****MenuModal**** → pushes multiple cards.
