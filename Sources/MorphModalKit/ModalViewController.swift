@@ -26,6 +26,12 @@ public enum ReplaceAnimation: Equatable {
     case slide(_ points: CGFloat)
 }
 
+public enum StickyOption {
+  case none
+  case inherit
+  case sticky(StickyElementsContainer.Type)
+}
+
 public struct ModalOptions {
     // layout
     public var horizontalInset: CGFloat = 10
@@ -84,7 +90,7 @@ public final class ModalViewController: UIViewController {
     public func present(
         _ modal:ModalView,
         options: ModalOptions = ModalOptions.default,
-        sticky: StickyElementsContainer.Type? = nil,
+        sticky: StickyOption = .none,
         animated:Bool = true,
         showsOverlay:Bool = true,
         completion:(()->Void)? = nil) {
@@ -118,7 +124,7 @@ public final class ModalViewController: UIViewController {
     public func push(
         _ modal:ModalView,
         options: ModalOptions? = nil,
-        sticky: StickyElementsContainer.Type? = nil,
+        sticky: StickyOption = .none,
         animated:Bool = true,
         completion:(()->Void)? = nil)
     {
@@ -130,8 +136,23 @@ public final class ModalViewController: UIViewController {
             view.insertSubview(overlay, at: 0)
             overlay.frame = view.bounds
         }
+        
+        let stickyType: StickyElementsContainer.Type?
+        switch sticky {
+        case .none:
+          stickyType = nil
+        case .sticky(let type):
+          stickyType = type
+        case .inherit:
+          // if there’s a previous container, pull its sticky’s class
+          if let prev = containerStack.last {
+            stickyType = type(of: prev.sticky)
+          } else {
+            stickyType = nil
+          }
+        }
 
-        var c = makeContainer(for: modal, sticky: sticky)
+        var c = makeContainer(for: modal, sticky: stickyType)
         layout(&c)
         c.wrapper.transform = .init(
             translationX: 0,
