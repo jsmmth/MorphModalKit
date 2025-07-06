@@ -19,7 +19,7 @@ class MorphModal: UIViewController, ModalView {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        morphContainer.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.95, alpha: 1)
+        morphContainer.backgroundColor = .tertiarySystemGroupedBackground
         morphContainer.layer.cornerCurve = .continuous
         morphContainer.layer.cornerRadius = 20
         morphContainer.translatesAutoresizingMaskIntoConstraints = false

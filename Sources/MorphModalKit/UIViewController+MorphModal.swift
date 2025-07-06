@@ -28,6 +28,7 @@ public extension UIViewController {
             present(host, animated: false) {
                 host.present(
                     root,
+                    options: options,
                     sticky: sticky,
                     animated: animated,
                     showsOverlay: showsOverlay)

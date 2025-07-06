@@ -2,273 +2,231 @@
   <img width="100%" src="./banner.png" alt="MorphModalKit">
 </p>
 
-## Getting Started
-MorphModalKit is distributed as a Swift package. There are ****two**** easy ways to add it to your project:
+MorphModalKit is a lightweight, flexible UIKit package for building card-stack modals with smooth “morph” (replace) animations and support for sticky elements. It provides a blank-canvas container—feel free to use your own views and components.
 
-### 1. Swift Package Manager
+---
 
-1. In ****Xcode**** choose ****File › Add Packages…****
-2. Paste the repository URL: ```https://github.com/jsmmth/MorphModalKit.git```
-3. Press **Add Package**
-4. Pick the Xcode targets that should link against **MorphModalKit** and finish.
+## 🚀 Installation
 
-### 2. Directly in **Package.swift**
-If you manage dependencies with a manifest, add MorphModalKit to `dependencies` and link it from your target:
+### Swift Package Manager
+
+1. In Xcode, choose **File ▶ Add Packages…**  
+2. Enter this URL:  
+   ```
+   https://github.com/jsmmth/MorphModalKit.git
+   ```  
+3. Click **Add Package**, select your target(s), and finish.
+
+### Package.swift
+
+If you manage dependencies via a manifest:
+
 ```swift
-// swift-tools-version: 5.9
+// swift-tools-version:5.9
 import PackageDescription
 
 let package = Package(
-    name: "MyApp",
-    platforms: [ .iOS(.v15) ],
-    dependencies: [
-        // ▼ Add the package URL and the minimum version you want
-        .package(url: "https://github.com/jsmmth/MorphModalKit.git", from: "main")
-    ],
-    targets: [
-        .target(
-            name: "MyApp",
-            dependencies: [
-                // ▼ Link the product that the package exports
-                .product(name: "MorphModalKit", package: "MorphModalKit")
-            ])
-    ]
+  name: "MyApp",
+  platforms: [.iOS(.v15)],
+  dependencies: [
+    .package(url: "https://github.com/jsmmth/MorphModalKit.git", from: "main"),
+  ],
+  targets: [
+    .target(
+      name: "MyApp",
+      dependencies: [
+        .product(name: "MorphModalKit", package: "MorphModalKit")
+      ]
+    )
+  ]
 )
 ```
 
-Once the package resolves you can import the module anywhere inside your UIKit codebase:
+Then in your code:
+
 ```swift
 import MorphModalKit
 ```
-From here you’re ready to `presentModal(…)` — see below for the full API overview.
 
-## Presenting
-
-You can call this from any `UIViewController`.
-
-```swift
-presentModal(ModalView, animated: Bool = true, showsOverlay: Bool = true)
-```
 ---
->****Tip:**** The present call has an optional `sticky` param which allows you to pass `StickyElementsContainer`  which overlays and survives every *_replace_* operation (a.k.a. morph). Helpful for creating sticky elements across morphs.
 
-  ```swift
-presentModal(ModalView(), sticky: StickyElementsContainer.Type?)
-```
+## 🎨 Core Concepts
 
-## Modal View
+### ModalView
 
-When making a modal view you should conform your `UIViewController` to `ModalView`
+Conform your `UIViewController` to `ModalView`:
 
 ```swift
+public protocol ModalView: UIViewController {
+  /// Desired height for a given container width
+  func preferredHeight(for width: CGFloat) -> CGFloat
 
-protocol ModalView: UIViewController {
-    func preferredHeight(for width: CGFloat) -> CGFloat  // Preferred Sizing
-    var  canDismiss: Bool { get }  // Dismissable
-    var  dismissalHandlingScrollView: UIScrollView? { get }  // Nested scroll view for dismissal
+  /// Whether the modal can be dismissed by swipe or tapping overlay
+  var canDismiss: Bool { get }
 
-    // life‑cycle (all optional)
-    func modalWillAppear()
-    func modalDidAppear()
-    func modalWillDisappear()
-    func modalDidDisappear()
+  /// If returning a UIScrollView, its top-bounce gesture will dismiss the modal
+  var dismissalHandlingScrollView: UIScrollView? { get }
+
+  // Optional lifecycle hooks
+  func modalWillAppear()
+  func modalDidAppear()
+  func modalWillDisappear()
+  func modalDidDisappear()
 }
-
 ```
-  
 
-### Quick implementation example
+**Minimal example:**
 
 ```swift
-
 class ExampleModal: UIViewController, ModalView {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // build your UI here
-    }
-
-    func preferredHeight(for _: CGFloat) -> CGFloat { 320 }
-}
-
-```
-
-> ****Tip:**** The `preferredHeight` can never extend the device height. It'll animate smoothly to fit within the screen. Helpful for large modals with keyboard presenting views.
-
-> ****Tip:**** Return `dismissalHandlingScrollView` when your modal contains a nested `UIScrollView` (or subclass) whose *_top‑bounce_* should trigger dismissal instead of overscroll.
-
-
-## Navigation
-
-### Pushing
-Pushing to the modalVC allows you to create a navigation stack. The previous card stays visible behind the new one.
-  
-```swift
-
-modalVC.push(ModalView())
-
-```
-You're also able to provide `StickyElementsContainer` to the push.
-```swift
-modalVC.push(ModalView(), sticky: StickyElements.self)
-```
-
->****Tip:**** I find it helpful to have an extension which makes it easier to find the root ModalViewController.
-```swift
-import UIKit
-import MorphModalKit
-
-extension UIViewController {
-   var modalVC: ModalViewController? {
-       sequence(first: parent) { $0?.parent }.first { $0 is  ModalViewController } as? ModalViewController
-   }
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    // Build your UI…
+  }
+  func preferredHeight(for _: CGFloat) -> CGFloat { 320 }
 }
 ```
 
-  
-
-### Poppping/Hiding
-
-```swift
-modalVC.pop() // back to the previous card
-modalVC.hide() // close the entire stack
-```
-
-Both methods respect ****spring physics**** from `modalVC.animation`.
+> **Tip:** The container will never exceed the device height; it adapts when the keyboard appears. Wrap content in a scroll view and return it in `dismissalHandlingScrollView` to enable pull-to-dismiss from the scroll gesture.
 
 ---
 
+## 📱 Presenting & Navigation
+
+All presentation APIs live on any `UIViewController` once you import MorphModalKit.
+
+### Presenting
+
+```swift
+presentModal(
+  ExampleModal(),
+  options: ModalOptions.default,
+  sticky: StickyElementsContainer.Type? = nil,
+  animated: true,
+  showsOverlay: true
+)
+```
+
+- **`sticky`**: supply a subclass of `StickyElementsContainer` to render persistent UI during morph (replace) animations.
+- **`options`**: adjust layout, shadows, animation springs, and more (see Configuration below).
+
+### Pushing & Popping
+
+Within a `ModalView`, you can retrieve the host controller:
+
+```swift
+modalVC?.push(AnotherModal(), sticky: MySticky.self)
+modalVC?.pop()        // back to previous card
+modalVC?.hide()       // dismiss the entire stack
+```
+
+> _Tip_: Use this extension to find the current `ModalViewController` from anywhere else:
+
+```swift
+extension UIViewController {
+  var modalVC: ModalViewController? {
+    sequence(first: parent) { $0?.parent }
+      .first(where: { $0 is ModalViewController })
+      as? ModalViewController
+  }
+}
+```
 
 ### Replace (Morph)
 
-Morph is half push, half pop — the card stays in place, its *_content_* changes.
-
-  
+Swap the content of the top card without moving the card itself:
 
 ```swift
-
-modalVC.replace(
-   with: ModalView(),
-   direction: .forward,  // or `.backward`
-   animation: .scale)  // or `.slide(px)`
-
+modalVC?.replace(
+  with: NextModal(),
+  direction: .forward, // or .backward
+  animation: .scale // or .slide(100)
+)
 ```
 
-
-|`ReplaceAnimation`| Visual |
-|--|--|
-|`.scale` *_(default)_* | New view fades while scaling to 100 % |
-| `.slide(px)` | Both views slide horizontally by `px` points |
-
-
-## StickyElementsContainer
-
-The `StickyElementsContainer` is built to support sticky elements which stay visible when replacing (morphing) content of a container. Helpful if you want a sticky back button or next button on the view and just have the content changing behind it.
-
-When making a `StickyElementsContainer` it should conform to the UIView and when the ModalView gets replaced you'll receive a `contextDidChange` which you can override in your view to make contextual decisions or actions.
-
-### Quick implementation example
-
-```swift
-class StickyElements: StickyElementsContainer {
-    private  weak  var current: ModalView?
-
-    required init(modalVC: ModalViewController) {
-        super.init(modalVC: modalVC)
-        // Layout views
-    }
-
-    required init?(coder: NSCoder) { fatalError() }
-    
-    // Called when ever content is replaced
-    override func contextDidChange(to newOwner: ModalView, from oldOwner: ModalView?, animated: Bool) {
-        // Could to some contextual animation or content change based on view
-    }
-}
-```
-
-You'll then need to attach the StickyElements when you `push` or `present` with `modalVC.push(ModalView(), sticky: StickyElements.self)`
-
-> ****Important:**** `StickyElementsContainer` already forwards touches ****through**** itself, but not through its interactive sub‑views. It also has access to `modalVC` from within the view.
-
-## Configuration
-
-|Property|Effect|Default|
-|--|--|--|
-|`horizontalInset`|Side margins of every card|`10`|
-|`stackVerticalSpacing`| Gap between stacked cards|`20`|
-|`bottomSpacing`| Space from the bottom of the screen|`nil (safeAreaBottom + 10)`|
-|`keyboardSpacing`| Space between the modal and the keyboard|`10`|
-|`cornerRadius`| Card corner radius|`32`|
-|`cornerMask`| Card cornerMask settings|`[.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner]`|
-|`maxVisibleStack`|Max amount of cards to be shown in a stack|`2`|
-|`dimBackgroundColor`|Background color of the dimmed view|`.black`|
-|`dimOpacityMultiplier`|Darkness of background cards|`0.06`|
-|`overlayOpacity`|Overlay opacity|`0.2`|
-|`overlayColor`|Color of the overlay|`.black`|
-|`modalBackgroundColor`|Background of the base modal container|`.systemBackground`|
-|`animation`|Allows you to adjust modal animation spring settings|`ModalAnimationSettings(duration: 0.4, damping: 0.86, velocity: 0.8)`|
-|`morphAnimation`|Allows you to adjust animation spring settings for morph animations|`ModalAnimationSettings(duration: 0.4, damping: 0.95, velocity: 1)`|
-|`cardShadow`|Allows you to adjust the shadow of modal cards|`(.black, 0.12, 9, .init(width: 0, height: 2))`|
-|`usesSnapshots`|Whether or not the background stacks snapshot|`true`|
-|`usesSnapshotsForMorph`|Whether or not the morphing views are snapshotted|`false`|
-
-### Example:
-
-  
-
-```swift
-var options: ModalOptions = ModalOptions.default
-options.cornerRadius = 24
-options.cardShadow.opacity = 0.25
-options.overlayColor = .white
-options.animation.duration = 0.25
-options.stackVerticalSpacing = 16
-
-self.presentModal(MenuModal(), options: options, sticky: StickyElements.self)
-```
-
-## Tricks
-
-### Snapshots & Performance
-
-`ModalViewController` converts all *_background_* cards into static snapshots to keep the render loop silky‑smooth. The live view is restored automatically when the card becomes front‑most. You can disable this with `usesSnapshots` property if you want background cards to remain active.
-
-### Height adjusting
-
-All `ModalView` views have a `preferredHeight` value to which it will attempt to stick to. Although if there is a situation where there is not enough room on the device it will shrink the modal to ensure there is enough space to show the content. Be mindful of this when creating modal content with inputs where the keyboard will reduce the amount of available space. You may need to wrap your content in a UIScrollView and use the `dismissalHandlingScrollView`.
-
-### Keyboard avoidance
-
-The host listens to `UIResponder.keyboardWillChangeFrameNotification` and re‑layouts the ****entire stack****, keeping `keyboardSpacing` points between the active card and the keyboard.
-
-### Disabling dismissal
-```swift
-
-final class CriticalWarning: UIViewController, ModalView {
-    var canDismiss: Bool { false } // modal cannot be dragged down
-}
-
-```
-
-You can still call `modalVC.pop()` programmatically.
-
-##  Full Example
-
-See [`Examples/UIKitExample/UIKitExample/Modals`](./Examples/UIKitExample/UIKitExample/Modals)
-for a working demo that includes:
-
-* ****MenuModal**** → pushes multiple cards.
-
-* ****MorphPage**** → shows morph navigation with sticky header.
-
-* ****ScrollPage**** → demonstrates scroll‑to‑dismiss.
-
-* ****InputPage****  → automatic resizing above the keyboard.
-
-  
+- **`.scale`** (default): fades between views, scaling from 95–105%.
+- **`.slide(px)`**: both incoming and outgoing views slide horizontally by `px`.
 
 ---
-  
 
-### Happy morphing 🚀
+## 📌 StickyElementsContainer
+
+Use a `StickyElementsContainer` subclass to overlay persistent UI (e.g., headers, footers, navigation bars) across replace animations.
+
+```swift
+class MySticky: StickyElementsContainer {
+  required init(modalVC: ModalViewController) {
+    super.init(modalVC: modalVC)
+    // add subviews & constraints…
+  }
+  required init?(coder: NSCoder) { fatalError() }
+
+  override func contextDidChange(
+    to newOwner: ModalView,
+    from oldOwner: ModalView?,
+    animated: Bool
+  ) {
+    // update state when the modal content changes
+  }
+}
+```
+
+Pass your sticky class to `present(…, sticky:)` or `push(…, sticky:)`.
+
+> **Note:** Interaction events “fall through” the container except on its interactive subviews.
+
+---
+
+## ⚙️ Configuration
+
+Customize every aspect via `ModalOptions`:
+
+| Property                   | What it does                                             | Default                           |
+|----------------------------|----------------------------------------------------------|-----------------------------------|
+| `horizontalInset`          | Side margins of each card                                | `10`                              |
+| `bottomSpacing`            | Space from bottom (nil = safe area + 10)                 | `nil`                             |
+| `stackVerticalSpacing`     | Gap between stacked cards                                | `20`                              |
+| `keyboardSpacing`          | Gap between the bottom of the card and the keyboard      | `10`                              |
+| `cornerRadius`             | Card corner radius                                       | `32`                              |
+| `cornerMask`               | Card corner mask                                         | `[.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner]` |
+| `maxVisibleStack`          | How many cards peek behind the front card                | `2`                               |
+| `dimBackgroundColor`       | Color of background cards                                | `.black`                          |
+| `dimOpacityMultiplier`     | Darkness of background cards                             | `0.06`                            |
+| `overlayColor`             | Overlay backdrop color                                   | `.black`                          |
+| `overlayOpacity`           | Overlay backdrop opacity                                 | `0.2`                             |
+| `modalBackgroundColor`     | Base card background                                     | `.secondarySystemGroupedBackground` |
+| `animation`                | Spring settings for present/push/pop                     | `(0.4, damping:0.86, velocity:0.8)` |
+| `morphAnimation`           | Spring settings for replace (morph)                      | `(0.4, damping:0.95, velocity:1)` |
+| `cardShadow`               | Card shadow `(color, opacity, radius, offset)`           | `(.black, 0.12, 9, (0,2))`        |
+| `usesSnapshots`            | Snapshot offscreen cards for performance                 | `true`                            |
+| `usesSnapshotsForMorph`    | Snapshot during morph replacements                       | `false`                           |
+| `showsHandle`              | Show drag-handle when dismissable                        | `true`                            |
+| `handleColor`              | Color of the drag-handle                                 | `.tertiarySystemGroupedBackground` |
+
+**Example: Full-width, bottom-pinned modal**
+
+```swift
+var opts = ModalOptions.default
+opts.horizontalInset = 0
+opts.bottomSpacing = 0
+opts.cornerMask = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+
+presentModal(MyModal(), options: opts, sticky: MySticky.self)
+```
+
+---
+
+## 🔍 Tips & Tricks
+
+- **Performance**: Background cards snapshot themselves for smooth animations. Disable via `options.usesSnapshots = false`.
+- **Keyboard Avoidance**: The stack re-layouts on keyboard frame changes, maintaining `keyboardSpacing`.
+- **Scroll-to-Dismiss**: Return your scroll view in `dismissalHandlingScrollView`, helpful when wrapping content in a `UIScrollView` or subclass.
+- **Disable Dismissal**: Override `var canDismiss: Bool { false }` in your `ModalView` You'll still be able to programatically call `.pop`'.
+
+---
+
+## 🛠 Example Project
+
+See [Examples/UIKitExample/Modals](./Examples/UIKitExample/UIKitExample/Modals) for a working demo using only the package’s APIs. Feel free to swap in your own UI—this example is just a starting point.
+
+Happy morphing! 🚀

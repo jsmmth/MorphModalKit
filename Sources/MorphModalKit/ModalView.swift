@@ -8,7 +8,6 @@
 import UIKit
 
 public protocol ModalView: UIViewController {
-
     // Sizing
     func preferredHeight(for width: CGFloat) -> CGFloat
 
@@ -26,8 +25,8 @@ public protocol ModalView: UIViewController {
     func modalDidDisappear()
 }
 
-// Default
 public extension ModalView {
+    // Defaults
     func preferredHeight(for width: CGFloat) -> CGFloat { 0 }
     var canDismiss: Bool { true }
     var dismissalHandlingScrollView: UIScrollView? { nil }
@@ -36,4 +35,12 @@ public extension ModalView {
     func modalDidAppear()     {}
     func modalWillDisappear() {}
     func modalDidDisappear()  {}
+    
+    // Access to modalVC
+    var modalVC: ModalViewController? {
+        if let parent = self.parent as? ModalViewController {
+            return parent
+        }
+        return self.presentingViewController as? ModalViewController
+    }
 }

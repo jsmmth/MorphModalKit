@@ -11,7 +11,7 @@ import MorphModalKit
 private extension UIButton {
   static func sampleButton(
     title: String,
-    textColor: UIColor = UIColor(red: 0.25, green: 0.25, blue: 0.25, alpha: 1)
+    textColor: UIColor = .label
   ) -> UIButton {
       var cfg = UIButton.Configuration.plain()
       cfg.title = title
@@ -23,7 +23,7 @@ private extension UIButton {
       }
       cfg.contentInsets = .init(top: 8, leading: 16, bottom: 8, trailing: 16)
       let btn = UIButton(configuration: cfg)
-      btn.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.95, alpha: 1)
+      btn.backgroundColor = .systemGray6
       btn.layer.cornerRadius = 12
       btn.layer.cornerCurve = .continuous
       btn.clipsToBounds = true
@@ -43,7 +43,7 @@ class ViewController: UIViewController {
     }()
     
     override func viewDidLoad() {
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         
         view.addSubview(icon)
         view.addSubview(presentButton)
@@ -63,7 +63,13 @@ class ViewController: UIViewController {
     }
     
     @objc private func onPresentPress() {
-        let options: ModalOptions = ModalOptions.default
+        var options: ModalOptions = ModalOptions.default
+        
+        // Example, full width modal
+        // options.horizontalInset = 0
+        // options.bottomSpacing = 0
+        // options.cornerMask = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        
         self.presentModal(MenuModal(), options: options, sticky: StickyElements.self)
     }
 }

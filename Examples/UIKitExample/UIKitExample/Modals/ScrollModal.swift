@@ -13,16 +13,17 @@ class ScrollModal: UIViewController, ModalView {
     private let text = UILabel()
     
     private let textView: UITextView = {
-      let tv = UITextView()
-      tv.translatesAutoresizingMaskIntoConstraints = false
-      tv.isEditable = false
-      tv.isSelectable = false
-      tv.alwaysBounceVertical = true
-      tv.showsVerticalScrollIndicator = false
-      tv.textContainerInset = .init(top: 32, left: 20, bottom: 32, right: 20)
-      tv.font = .rounded(ofSize: 17, weight: .medium)
-      tv.textColor = .label
-      return tv
+        let tv = UITextView()
+        tv.translatesAutoresizingMaskIntoConstraints = false
+        tv.isEditable = false
+        tv.isSelectable = false
+        tv.alwaysBounceVertical = true
+        tv.showsVerticalScrollIndicator = false
+        tv.textContainerInset = .init(top: 32, left: 20, bottom: 32, right: 20)
+        tv.font = .rounded(ofSize: 17, weight: .medium)
+        tv.backgroundColor = .tertiarySystemGroupedBackground
+        tv.textColor = .label
+        return tv
     }()
 
     override func viewDidLoad() {

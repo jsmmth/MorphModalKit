@@ -43,11 +43,13 @@ public struct ModalOptions {
     // appearance
     public var maxVisibleStack: Int = 2
     public var removesSelfWhenCleared: Bool = true
-    public var modalBackgroundColor: UIColor = .systemBackground
+    public var modalBackgroundColor: UIColor = .secondarySystemGroupedBackground
     public var cornerMask: CACornerMask = [
         .layerMinXMinYCorner, .layerMaxXMinYCorner,
         .layerMinXMaxYCorner, .layerMaxXMaxYCorner
     ]
+    public var showsHandle: Bool = true
+    public var handleColor: UIColor = .tertiarySystemGroupedBackground
 
     // behavior
     public var usesSnapshots: Bool = true
@@ -86,22 +88,24 @@ public final class ModalViewController: UIViewController {
         animated:Bool = true,
         showsOverlay:Bool = true,
         completion:(()->Void)? = nil) {
+            self.options = options
             overlayEnabled = showsOverlay
-                if containerStack.isEmpty {
-                    push(modal,
-                         options: options,
-                         sticky: sticky,
-                         animated:animated,
-                         completion:completion)
-                    return
-                }
-                hide(completion: {
-                    self.push(modal,
-                              options: options,
-                              sticky: sticky,
-                              animated:animated,
-                              completion:completion)
-                })
+            
+            if containerStack.isEmpty {
+                push(modal,
+                     options: options,
+                     sticky: sticky,
+                     animated:animated,
+                     completion:completion)
+                return
+            }
+            hide(completion: {
+                self.push(modal,
+                          options: options,
+                          sticky: sticky,
+                          animated:animated,
+                          completion:completion)
+            })
     }
 
     /// Pushes a new modal to the stack.
@@ -113,12 +117,12 @@ public final class ModalViewController: UIViewController {
     ///   - completion: An optional closure to be called after presentation completes.
     public func push(
         _ modal:ModalView,
-        options: ModalOptions = ModalOptions.default,
+        options: ModalOptions? = nil,
         sticky: StickyElementsContainer.Type? = nil,
         animated:Bool = true,
         completion:(()->Void)? = nil)
     {
-        self.options = options
+        let options = options ?? self.options
         
         // bring overlay if this is the first card
         if overlayEnabled && containerStack.isEmpty {
@@ -589,6 +593,21 @@ public final class ModalViewController: UIViewController {
             sticky.topAnchor.constraint(equalTo: wrapper.topAnchor),
             sticky.bottomAnchor.constraint(equalTo: wrapper.bottomAnchor)
         ])
+        
+        if options.showsHandle, modal.canDismiss {
+            let handle = UIView()
+            handle.backgroundColor = options.handleColor
+            handle.layer.cornerCurve = .continuous
+            handle.layer.cornerRadius = 2
+            handle.translatesAutoresizingMaskIntoConstraints = false
+            wrapper.addSubview(handle)
+            NSLayoutConstraint.activate([
+                handle.widthAnchor.constraint(equalToConstant: 52),
+                handle.heightAnchor.constraint(equalToConstant: 4),
+                handle.topAnchor.constraint(equalTo: wrapper.topAnchor, constant: 8),
+                handle.centerXAnchor.constraint(equalTo: wrapper.centerXAnchor),
+            ])
+        }
 
         // live content
         modal.view.translatesAutoresizingMaskIntoConstraints = false

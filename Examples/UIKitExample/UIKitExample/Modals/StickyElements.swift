@@ -11,7 +11,7 @@ import MorphModalKit
 private extension UIButton {
   static func navButton(
     title: String,
-    textColor: UIColor = UIColor(red: 0.25, green: 0.25, blue: 0.25, alpha: 1)
+    textColor: UIColor = .label
   ) -> UIButton {
       var cfg = UIButton.Configuration.plain()
       cfg.title = title.uppercased()
@@ -23,7 +23,7 @@ private extension UIButton {
       }
       cfg.contentInsets = .init(top: 4, leading: 8, bottom: 4, trailing: 8)
       let btn = UIButton(configuration: cfg)
-      btn.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.95, alpha: 1)
+      btn.backgroundColor = .tertiarySystemGroupedBackground
       btn.layer.cornerRadius = 12
       btn.layer.cornerCurve = .continuous
       btn.clipsToBounds = true
@@ -44,7 +44,6 @@ class StickyElements: StickyElementsContainer {
         lbl.numberOfLines = 0
         return lbl
     }()
-    private let handlebar = UIView()
     private let stackView = UIStackView()
 
     required init(modalVC: ModalViewController) {
@@ -60,11 +59,6 @@ class StickyElements: StickyElementsContainer {
             gradientContainer.heightAnchor.constraint(equalToConstant: 40)
         ])
         
-        handlebar.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.95, alpha: 1)
-        handlebar.layer.cornerCurve = .continuous
-        handlebar.layer.cornerRadius = 2
-        handlebar.translatesAutoresizingMaskIntoConstraints = false
-        
         titleLabel.text = "Sticky"
         backBtn.addTarget(self, action: #selector(onBack), for: .touchUpInside)
         nextBtn.addTarget(self, action: #selector(onNext), for: .touchUpInside)
@@ -74,19 +68,12 @@ class StickyElements: StickyElementsContainer {
         stackView.distribution = .equalSpacing
         stackView.translatesAutoresizingMaskIntoConstraints = false
         [backBtn, titleLabel, nextBtn].forEach(stackView.addArrangedSubview)
-        
-        addSubview(handlebar)
         addSubview(stackView)
-        
+    
         NSLayoutConstraint.activate([
-            handlebar.widthAnchor.constraint(equalToConstant: 52),
-            handlebar.heightAnchor.constraint(equalToConstant: 4),
-            handlebar.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            handlebar.centerXAnchor.constraint(equalTo: centerXAnchor),
-            
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            stackView.topAnchor.constraint(equalTo: handlebar.bottomAnchor, constant: 12)
+            stackView.topAnchor.constraint(equalTo: topAnchor, constant: 24)
         ])
     }
     
@@ -96,8 +83,8 @@ class StickyElements: StickyElementsContainer {
         super.layoutSubviews()
         let gradient = CAGradientLayer()
         gradient.colors = [
-            UIColor.systemBackground.cgColor,
-            UIColor.systemBackground.withAlphaComponent(0).cgColor
+            UIColor.tertiarySystemGroupedBackground.cgColor,
+            UIColor.tertiarySystemGroupedBackground.withAlphaComponent(0).cgColor
         ]
         gradient.startPoint = CGPoint(x: 0.5, y: 0.0)
         gradient.endPoint = CGPoint(x: 0.5, y: 1.0)
@@ -106,8 +93,13 @@ class StickyElements: StickyElementsContainer {
         gradientContainer.layer.insertSublayer(gradient, at: 0)
     }
     
-    // show only stack view for morph modals
     override func contextDidChange(to newOwner: ModalView, from _: ModalView?, animated: Bool) {
+        // Only show the gradient when there is a scrollView
+        let hasScroll = newOwner.dismissalHandlingScrollView != nil
+        let gradientUpdate = { self.gradientContainer.alpha = hasScroll ? 1 : 0 }
+        animated ? UIView.animate(withDuration: 0.20, animations: gradientUpdate) : gradientUpdate()
+        
+        // show only stack view for morph modals
         current = newOwner as? MorphModal
         let visible = current != nil
         let update = { self.stackView.alpha = visible ? 1 : 0 }

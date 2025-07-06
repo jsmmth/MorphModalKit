@@ -12,8 +12,8 @@ private extension UIButton {
   static func menuTile(
     title: String,
     symbol: String,
-    iconColor: UIColor = UIColor(red: 0.25, green: 0.25, blue: 0.25, alpha: 1),
-    textColor: UIColor = UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1)
+    iconColor: UIColor = .label,
+    textColor: UIColor = .systemGray
   ) -> UIButton {
       var cfg = UIButton.Configuration.plain()
       let symCfg = UIImage.SymbolConfiguration(pointSize: 20, weight: .bold)
@@ -29,7 +29,7 @@ private extension UIButton {
         return out
       }
       let btn = UIButton(configuration: cfg)
-      btn.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.95, alpha: 1)
+      btn.backgroundColor = .tertiarySystemGroupedBackground
       btn.layer.cornerRadius = 4
       btn.layer.cornerCurve = .continuous
       btn.clipsToBounds = true
