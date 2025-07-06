@@ -33,6 +33,8 @@ public struct ModalOptions {
     public var stackVerticalSpacing: CGFloat = 20
     public var bottomSpacing: CGFloat? = nil
     public var keyboardSpacing: CGFloat = 10
+    public var centerOnIpad: Bool = true
+    public var centerIPadWidthMultiplier: CGFloat = 0.7
 
     // background dimming
     public var dimBackgroundColor: UIColor = .black
@@ -369,7 +371,11 @@ public final class ModalViewController: UIViewController {
     }
 
     private var availableWidth: CGFloat {
-        view.bounds.width - options.horizontalInset * 2
+        if traitCollection.userInterfaceIdiom == .pad && options.centerOnIpad {
+            return view.bounds.width * options.centerIPadWidthMultiplier
+        }
+        
+        return view.bounds.width - options.horizontalInset * 2
     }
     
     /// Re-computes size/position for one container and everything it owns.
@@ -377,11 +383,25 @@ public final class ModalViewController: UIViewController {
         let width  = availableWidth
         let height = clampedHeight(for: c.modalView, width: width)
         c.wrapper.bounds.size = .init(width: width, height: height)
-        let botPad = options.bottomSpacing ?? max(view.safeAreaInsets.bottom, 10)
+        
         let kbReserve = keyboardHeight > 0 ? keyboardHeight + options.keyboardSpacing : 0
-        let bottomY = view.bounds.maxY - botPad - kbReserve
-        c.wrapper.center = .init(x: view.bounds.midX,
-                                 y: bottomY - height / 2)
+        if traitCollection.userInterfaceIdiom == .pad && options.centerOnIpad {
+            // center on iPad, but move up by half the keyboard reserve
+            let centerY = view.bounds.midY - kbReserve/2
+            c.wrapper.center = CGPoint(
+                x: view.bounds.midX,
+                y: centerY
+            )
+        } else {
+            // bottom-anchored on phones (or if centerOnIpad = false)
+            let botPad = options.bottomSpacing ?? max(view.safeAreaInsets.bottom, 10)
+            let bottomY = view.bounds.maxY - botPad - kbReserve
+            c.wrapper.center = CGPoint(
+                x: view.bounds.midX,
+                y: bottomY - height/2
+            )
+        }
+        
         let s = options.cardShadow
         c.wrapper.layer.shadowColor   = s.color.cgColor
         c.wrapper.layer.shadowOpacity = s.opacity
