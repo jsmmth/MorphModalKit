@@ -147,7 +147,7 @@ Morph is half push, half pop — the card stays in place, its *_content_* change
 
 ```swift
 
-host.replace(
+modalVC.replace(
    with: ModalView(),
    direction: .forward,  // or `.backward`
    animation: .scale)  // or `.slide(px)`
