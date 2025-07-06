@@ -9,7 +9,8 @@ import UIKit
 import MorphModalKit
 
 enum MorphStep: Int { case one = 1, two, three }
-final class MorphModal: UIViewController, ModalView {
+
+class MorphModal: UIViewController, ModalView {
     let step: MorphStep
     private let morphContainer = UIView()
     init(step: MorphStep) { self.step = step; super.init(nibName: nil, bundle: nil) }
