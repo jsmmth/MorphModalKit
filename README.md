@@ -7,6 +7,7 @@ MorphModalKit is a lightweight, flexible UIKit package for building card-stack m
 <p align="center">
   <img width="100%" src="./example.gif" alt="MorphModalKit">
 </p>
+
 ---
 
 ## 🚀 Installation
