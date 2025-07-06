@@ -44,7 +44,7 @@ From here you’re ready to `presentModal(…)` — see below for the full API o
 
 ## Presenting
 
-`ModalViewController` is the brains of the operation.
+You can call this from any `UIViewController`.
 
 ```swift
 presentModal(ModalView, animated: Bool = true, showsOverlay: Bool = true)
@@ -101,12 +101,16 @@ class ExampleModal: UIViewController, ModalView {
 ## Navigation
 
 ### Pushing
-Pushing to the modalVC allows you to create a classing navigation stack. The previous card stays visible behind the new one.
+Pushing to the modalVC allows you to create a navigation stack. The previous card stays visible behind the new one.
   
 ```swift
 
-modalVC.push(ModalView(), sticky: StickyElementsContainer.Type?)
+modalVC.push(ModalView())
 
+```
+You're also able to provide `StickyElementsContainer` to the push.
+```swift
+modalVC.push(ModalView(), sticky: StickyElements.self)
 ```
 
 >****Tip:**** I find it helpful to have an extension which makes it easier to find the root ModalViewController.
@@ -143,7 +147,7 @@ Morph is half push, half pop — the card stays in place, its *_content_* change
 
 ```swift
 
-host.replace(
+modalVC.replace(
    with: ModalView(),
    direction: .forward,  // or `.backward`
    animation: .scale)  // or `.slide(px)`
@@ -154,7 +158,7 @@ host.replace(
 |`ReplaceAnimation`| Visual |
 |--|--|
 |`.scale` *_(default)_* | New view fades while scaling to 100 % |
-| `.slide(±px)` | Both views slide horizontally by `px` points |
+| `.slide(px)` | Both views slide horizontally by `px` points |
 
 
 ## StickyElementsContainer
