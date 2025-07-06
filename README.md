@@ -120,7 +120,7 @@ modalVC?.pop()        // back to previous card
 modalVC?.hide()       // dismiss the entire stack
 ```
 
-> _Tip_: Use this extension to find the current `ModalViewController` from anywhere else:
+> **Tip**: Use this extension to find the current `ModalViewController` from anywhere else:
 
 ```swift
 extension UIViewController {
@@ -172,6 +172,8 @@ class MySticky: StickyElementsContainer {
 ```
 
 Pass your sticky class to `present(…, sticky:)` or `push(…, sticky:)`.
+
+> **Tip**: See [Examples/UIKitExample/Modals/StickyElements.swift](./Examples/UIKitExample/UIKitExample/Modals/StickyElements.swift) for an example of how I have used this in the example.
 
 > **Note:** Interaction events “fall through” the container except on its interactive subviews.
 
