@@ -65,6 +65,8 @@ class ViewController: UIViewController {
     @objc private func onPresentPress() {
         var options: ModalOptions = ModalOptions.default
         
+        options.enableGlass = true
+        
         // Example, full width modal
         // options.horizontalInset = 0
         // options.bottomSpacing = 0

@@ -204,6 +204,7 @@ Customize every aspect via `ModalOptions`:
 | `usesSnapshotsForMorph`    | Snapshot during morph replacements                       | `false`                           |
 | `showsHandle`              | Show drag-handle when dismissable                        | `true`                            |
 | `handleColor`              | Color of the drag-handle                                 | `.tertiarySystemGroupedBackground` |
+| `enableGlass`              | Enables liquid glass background effect (iOS 26 only)     | `false`                           |
 
 **Example: Full-width, bottom-pinned modal**
 

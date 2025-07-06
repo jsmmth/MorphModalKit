@@ -21,7 +21,7 @@ class ScrollModal: UIViewController, ModalView {
         tv.showsVerticalScrollIndicator = false
         tv.textContainerInset = .init(top: 32, left: 20, bottom: 32, right: 20)
         tv.font = .rounded(ofSize: 17, weight: .medium)
-        tv.backgroundColor = .tertiarySystemGroupedBackground
+        tv.backgroundColor = .clear
         tv.textColor = .label
         return tv
     }()

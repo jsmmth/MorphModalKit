@@ -50,6 +50,7 @@ public struct ModalOptions {
     ]
     public var showsHandle: Bool = true
     public var handleColor: UIColor = .tertiarySystemGroupedBackground
+    public var enableGlass: Bool = false /// for iOS 26 only
 
     // behavior
     public var usesSnapshots: Bool = true
@@ -563,7 +564,19 @@ public final class ModalViewController: UIViewController {
         wrapper.layer.shadowOffset = s.offset
         wrapper.layer.maskedCorners = options.cornerMask
         wrapper.clipsToBounds = false
-        wrapper.backgroundColor = options.modalBackgroundColor
+        
+        if options.enableGlass, #available(iOS 26.0, *) {
+            wrapper.backgroundColor = .clear
+            let glass = UIGlassEffect()
+            let glassView = UIVisualEffectView(effect: glass)
+            glassView.frame = wrapper.bounds
+            glassView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            glassView.layer.cornerRadius = options.cornerRadius
+            glassView.layer.maskedCorners = options.cornerMask
+            wrapper.insertSubview(glassView, at: 0)
+        } else {
+            wrapper.backgroundColor = options.modalBackgroundColor
+        }
 
         // card (clips content)
         let card = UIView()
