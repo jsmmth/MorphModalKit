@@ -18,6 +18,7 @@ public extension UIViewController {
     ///   - dismissable: Whether the modal can be dismissed. Defaults to `true`.
     func presentModal(
         _ root: ModalView,
+        options: ModalOptions = ModalOptions.default,
         sticky: StickyElementsContainer.Type? = nil,
         animated: Bool = true,
         showsOverlay: Bool = true) {

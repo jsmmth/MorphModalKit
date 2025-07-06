@@ -33,7 +33,6 @@ private extension UIButton {
 }
 
 class ViewController: UIViewController {
-    private let host = ModalViewController()
     private let presentButton = UIButton.sampleButton(title: "MorphModalKit")
     private let icon: UIImageView = {
         let view = UIImageView()
@@ -64,7 +63,8 @@ class ViewController: UIViewController {
     }
     
     @objc private func onPresentPress() {
-        self.presentModal(MenuModal(), sticky: StickyElements.self)
+        let options: ModalOptions = ModalOptions.default
+        self.presentModal(MenuModal(), options: options, sticky: StickyElements.self)
     }
 }
 

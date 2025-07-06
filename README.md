@@ -204,20 +204,24 @@ You'll then need to attach the StickyElements when you `push` or `present` with 
 |`overlayColor`|Color of the overlay|`.black`|
 |`modalBackgroundColor`|Background of the base modal container|`.systemBackground`|
 |`animation`|Allows you to adjust modal animation spring settings|`ModalAnimationSettings(duration: 0.4, damping: 0.86, velocity: 0.8)`|
-|`morphAnimation`|Allows you to adjust animation spring settings for morph animations|`ModalAnimationSettings(duration: 0.3, damping: 0.95, velocity: 1)`|
+|`morphAnimation`|Allows you to adjust animation spring settings for morph animations|`ModalAnimationSettings(duration: 0.4, damping: 0.95, velocity: 1)`|
 |`cardShadow`|Allows you to adjust the shadow of modal cards|`(.black, 0.12, 9, .init(width: 0, height: 2))`|
 |`usesSnapshots`|Whether or not the background stacks snapshot|`true`|
+|`usesSnapshotsForMorph`|Whether or not the morphing views are snapshotted|`false`|
 
 ### Example:
 
   
 
 ```swift
-modalVC.cornerRadius = 24
-modalVC.cardShadow.opacity = 0.25
-modalVC.overlayColor = .white
-modalVC.animation.duration = 0.25
-modalVC.stackVerticalSpacing = 16
+var options: ModalOptions = ModalOptions.default
+options.cornerRadius = 24
+options.cardShadow.opacity = 0.25
+options.overlayColor = .white
+options.animation.duration = 0.25
+options.stackVerticalSpacing = 16
+
+self.presentModal(MenuModal(), options: options, sticky: StickyElements.self)
 ```
 
 ## Tricks
