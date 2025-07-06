@@ -34,8 +34,8 @@ class ScrollStickyElements: StickyElementsContainer {
         super.layoutSubviews()
         let gradient = CAGradientLayer()
         gradient.colors = [
-            UIColor.tertiarySystemGroupedBackground.cgColor,
-            UIColor.tertiarySystemGroupedBackground.withAlphaComponent(0).cgColor
+            UIColor.secondarySystemGroupedBackground.cgColor,
+            UIColor.secondarySystemGroupedBackground.withAlphaComponent(0).cgColor
         ]
         gradient.startPoint = CGPoint(x: 0.5, y: 0.0)
         gradient.endPoint = CGPoint(x: 0.5, y: 1.0)
