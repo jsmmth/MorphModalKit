@@ -184,13 +184,15 @@ public final class ModalViewController: UIViewController {
     ///   - animated: Whether the pop should be animated. Defaults to `true`.
     ///   - completion: An optional closure to be called after presentation completes.
     public func pop(animated:Bool = true, completion:(()->Void)? = nil) {
+        guard !isTransitioning else { return }
         guard let removing = containerStack.last else { return }
 
         // if last card hide the view
         guard containerStack.count > 1 else {
             hide(animated:animated,completion:completion); return
         }
-
+        
+        isTransitioning = true
         let dist  = view.bounds.maxY - removing.wrapper.frame.minY + 50
         let slide = removing.wrapper.transform.translatedBy(x:0,y:dist)
         let next = containerStack[containerStack.count-2]
@@ -207,6 +209,7 @@ public final class ModalViewController: UIViewController {
             removing.modalView.modalDidDisappear()
             next.modalView.modalDidAppear()
             self.refreshScrollDismissBinding()
+            self.isTransitioning = false
             completion?()
         }
     }
@@ -308,6 +311,8 @@ public final class ModalViewController: UIViewController {
     ///   - animated: Whether the pop should be animated. Defaults to `true`.
     ///   - completion: An optional closure to be called after presentation completes.
     public func hide(animated:Bool = true, completion:(()->Void)? = nil) {
+        guard !isTransitioning else { return }
+        isTransitioning = true
         containerStack.forEach{ $0.modalView.modalWillDisappear() }
         animate(options.animation, animated) {
             self.overlay.alpha = 0
@@ -318,6 +323,7 @@ public final class ModalViewController: UIViewController {
         } completion:{
             self.interaction.bindDismissScrollView(nil)
             self.clearAll()
+            self.isTransitioning = false
             completion?()
         }
     }
@@ -333,6 +339,7 @@ public final class ModalViewController: UIViewController {
         var sticky: StickyElementsContainer
     }
     
+    private var isTransitioning: Bool = false
     private var containerStack: [Container] = []
     let interaction = ModalInteractionController()
     private var kbdHeight: CGFloat = 0
