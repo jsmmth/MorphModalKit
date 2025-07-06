@@ -196,6 +196,8 @@ Customize every aspect via `ModalOptions`:
 | `usesSnapshotsForMorph`    | Snapshot during morph replacements                       | `false`                           |
 | `showsHandle`              | Show drag-handle when dismissable                        | `true`                            |
 | `handleColor`              | Color of the drag-handle                                 | `.tertiarySystemGroupedBackground` |
+| `centerOnIpad`             | Whether ot not the modal should be centered on iPad or not | `true`                          |
+| `centerIPadWidthMultiplier`| Width of the modal when centered on iPad                 | `0.7`                             |
 
 **Example: Full-width, bottom-pinned modal**
 
