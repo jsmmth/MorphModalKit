@@ -36,7 +36,6 @@ class StickyElements: StickyElementsContainer {
     private weak var current: MorphModal?
     private let backBtn = UIButton.navButton(title: "Back")
     private let nextBtn = UIButton.navButton(title: "Next")
-    private let gradientContainer = UIView()
     private let titleLabel: UILabel = {
         let lbl = UILabel()
         lbl.font = .systemFont(ofSize: 17, weight: .bold)
@@ -48,16 +47,6 @@ class StickyElements: StickyElementsContainer {
 
     required init(modalVC: ModalViewController) {
         super.init(modalVC: modalVC)
-        
-        gradientContainer.translatesAutoresizingMaskIntoConstraints = false
-        gradientContainer.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        addSubview(gradientContainer)
-        NSLayoutConstraint.activate([
-            gradientContainer.topAnchor.constraint(equalTo: topAnchor),
-            gradientContainer.leadingAnchor.constraint(equalTo: leadingAnchor),
-            gradientContainer.trailingAnchor.constraint(equalTo: trailingAnchor),
-            gradientContainer.heightAnchor.constraint(equalToConstant: 40)
-        ])
         
         titleLabel.text = "Sticky"
         backBtn.addTarget(self, action: #selector(onBack), for: .touchUpInside)
@@ -79,27 +68,9 @@ class StickyElements: StickyElementsContainer {
     
     required init?(coder: NSCoder) { fatalError() }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        let gradient = CAGradientLayer()
-        gradient.colors = [
-            UIColor.tertiarySystemGroupedBackground.cgColor,
-            UIColor.tertiarySystemGroupedBackground.withAlphaComponent(0).cgColor
-        ]
-        gradient.startPoint = CGPoint(x: 0.5, y: 0.0)
-        gradient.endPoint = CGPoint(x: 0.5, y: 1.0)
-        gradient.frame = gradientContainer.bounds
-        gradientContainer.layer.sublayers?.forEach { $0.removeFromSuperlayer() }
-        gradientContainer.layer.insertSublayer(gradient, at: 0)
-    }
-    
     override func contextDidChange(to newOwner: ModalView, from _: ModalView?, animated: Bool) {
-        // Only show the gradient when there is a scrollView
-        let hasScroll = newOwner.dismissalHandlingScrollView != nil
-        let gradientUpdate = { self.gradientContainer.alpha = hasScroll ? 1 : 0 }
-        animated ? UIView.animate(withDuration: 0.20, animations: gradientUpdate) : gradientUpdate()
-        
         // show only stack view for morph modals
+        // This is an example of how I only show the stack view when I get a ModalView of MorphModal
         current = newOwner as? MorphModal
         let visible = current != nil
         let update = { self.stackView.alpha = visible ? 1 : 0 }
