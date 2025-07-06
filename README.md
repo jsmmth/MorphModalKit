@@ -105,8 +105,12 @@ Pushing to the modalVC allows you to create a classing navigation stack. The pre
   
 ```swift
 
-modalVC.push(ModalView(), sticky: StickyElementsContainer.Type?)
+modalVC.push(ModalView())
 
+```
+You're also able to provide `StickyElementsContainer` to the push.
+```swift
+modalVC.push(ModalView(), sticky: StickyElements.self)
 ```
 
 >****Tip:**** I find it helpful to have an extension which makes it easier to find the root ModalViewController.
