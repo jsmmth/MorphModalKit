@@ -9,7 +9,7 @@ import UIKit
 import MorphModalKit
 
 class ScrollModal: UIViewController, ModalView {
-    var dismissalHandlingScrollView: UIScrollView? { textView }
+    var dismissalHandlingScrollView: UIScrollView? { textView } // Enables pulling scrollView to trigger drag of modal
     private let text = UILabel()
     
     private let textView: UITextView = {
