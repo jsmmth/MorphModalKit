@@ -9,8 +9,8 @@ MorphModalKit is distributed as a Swift package. There are ****two**** easy ways
 
 1. In ****Xcode**** choose ****File › Add Packages…****
 2. Paste the repository URL: ```https://github.com/jsmmth/MorphModalKit.git```
-3. press **Add Package**
-4. Pick the Xcode targets that should link against **MorphModalKit** and finish the wizard.
+3. Press **Add Package**
+4. Pick the Xcode targets that should link against **MorphModalKit** and finish.
 
 ### 2. Directly in **Package.swift**
 If you manage dependencies with a manifest, add MorphModalKit to `dependencies` and link it from your target:
