@@ -29,7 +29,7 @@ let package = Package(
   name: "MyApp",
   platforms: [.iOS(.v15)],
   dependencies: [
-    .package(url: "https://github.com/jsmmth/MorphModalKit.git", from: "main"),
+    .package(url: "https://github.com/jsmmth/MorphModalKit.git", from: "0.0.1"),
   ],
   targets: [
     .target(
