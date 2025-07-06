@@ -101,7 +101,7 @@ class ExampleModal: UIViewController, ModalView {
 ## Navigation
 
 ### Pushing
-Pushing to the modalVC allows you to create a classing navigation stack. The previous card stays visible behind the new one.
+Pushing to the modalVC allows you to create a navigation stack. The previous card stays visible behind the new one.
   
 ```swift
 
