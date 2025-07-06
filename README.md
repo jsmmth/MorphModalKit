@@ -4,6 +4,10 @@
 
 MorphModalKit is a lightweight, flexible UIKit package for building card-stack modals with smooth “morph” (replace) animations and support for sticky elements. It provides a blank-canvas container—feel free to use your own views and components.
 
+<p align="center">
+  <img width="100%" src="./example.gif" alt="MorphModalKit">
+</p>
+
 ---
 
 ## 🚀 Installation
@@ -101,13 +105,13 @@ All presentation APIs live on any `UIViewController` once you import MorphModalK
 presentModal(
   ExampleModal(),
   options: ModalOptions.default,
-  sticky: StickyElementsContainer.Type? = nil,
+  sticky: StickyOption = .none,
   animated: true,
   showsOverlay: true
 )
 ```
 
-- **`sticky`**: supply a subclass of `StickyElementsContainer` to render persistent UI during morph (replace) animations.
+- **`sticky` (optional)**: supply a subclass of `StickyElementsContainer` using `.sticky(MySticky.self)` to render persistent UI which sticks around during morph (replace) animations. Allowing you to have a view which acts as a container of shared elements between replace calls.
 - **`options`**: adjust layout, shadows, animation springs, and more (see Configuration below).
 
 ### Pushing & Popping
@@ -115,22 +119,12 @@ presentModal(
 Within a `ModalView`, you can retrieve the host controller:
 
 ```swift
-modalVC?.push(AnotherModal(), sticky: MySticky.self)
-modalVC?.pop()        // back to previous card
-modalVC?.hide()       // dismiss the entire stack
+modalVC?.push(AnotherModal()) // new modalView added to the stack
+modalVC?.pop() // back to previous card
+modalVC?.hide() // dismiss the entire stack
 ```
 
-> **Tip**: Use this extension to find the current `ModalViewController` from anywhere else:
-
-```swift
-extension UIViewController {
-  var modalVC: ModalViewController? {
-    sequence(first: parent) { $0?.parent }
-      .first(where: { $0 is ModalViewController })
-      as? ModalViewController
-  }
-}
-```
+When you push a new modal to the stack you can also provide `sticky` param (defaults to `.none`) to either inherit the previous modals sticky elements, provide a new sticky with `.sticky(MySticky.self)` element or set it to `.none`.
 
 ### Replace (Morph)
 
@@ -205,6 +199,8 @@ Customize every aspect via `ModalOptions`:
 | `showsHandle`              | Show drag-handle when dismissable                        | `true`                            |
 | `handleColor`              | Color of the drag-handle                                 | `.tertiarySystemGroupedBackground` |
 | `enableGlass`              | Enables liquid glass background effect (iOS 26 only)     | `false`                           |
+| `centerOnIpad`             | Whether ot not the modal should be centered on iPad or not | `true`                          |
+| `centerIPadWidthMultiplier`| Width of the modal when centered on iPad                 | `0.7`                             |
 
 **Example: Full-width, bottom-pinned modal**
 

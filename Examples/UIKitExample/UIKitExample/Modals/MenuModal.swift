@@ -95,20 +95,31 @@ class MenuModal: UIViewController, ModalView {
 
         // Actions
         pushBtn .addTarget(self, action: #selector(pushAnotherMenu), for: .touchUpInside)
-        popBtn  .addTarget(self, action: #selector(popModal),        for: .touchUpInside)
-        morphBtn.addTarget(self, action: #selector(openMorph),       for: .touchUpInside)
-        inputBtn.addTarget(self, action: #selector(openInput),       for: .touchUpInside)
-        listBtn .addTarget(self, action: #selector(openList),        for: .touchUpInside)
-        closeBtn.addTarget(self, action: #selector(closeFlow),       for: .touchUpInside)
+        popBtn  .addTarget(self, action: #selector(popModal), for: .touchUpInside)
+        morphBtn.addTarget(self, action: #selector(openMorph), for: .touchUpInside)
+        inputBtn.addTarget(self, action: #selector(openInput), for: .touchUpInside)
+        listBtn .addTarget(self, action: #selector(openList), for: .touchUpInside)
+        closeBtn.addTarget(self, action: #selector(closeFlow), for: .touchUpInside)
     }
 
     // MARK: Navigation
-    @objc private func pushAnotherMenu() { modalVC?.push(MenuModal(), sticky: StickyElements.self) }
-    @objc private func popModal() { modalVC?.pop() }
+    
+    // Morph inner content
     @objc private func openMorph() { modalVC?.replace(with: MorphModal(step: .one)) }
-    @objc private func openInput() { modalVC?.push(InputModal(),   sticky: StickyElements.self) }
-    @objc private func openList() { modalVC?.push(ScrollModal(),  sticky: StickyElements.self) }
+    // Programatically pop a modal
+    @objc private func popModal() { modalVC?.pop() }
+    
+    // Example push - same MenuModal
+    /// It's likely you won't be pushing the same modal content in your real usage
+    /// but for simplicity we'll reuse the same menuModal and we'll inherit the previous stacks sticky elements here to be used during morph
+    @objc private func pushAnotherMenu() { modalVC?.push(MenuModal(), sticky: .inherit) }
+    
+    // Navigate to other views
+    @objc private func openInput() { modalVC?.push(InputModal()) }
     @objc private func closeFlow() { modalVC?.hide() }
+    
+    // Example of pushing with a new StickyElementsContainer view
+    @objc private func openList() { modalVC?.push(ScrollModal(), sticky: .sticky(ScrollStickyElements.self)) }
 
     func preferredHeight(for _: CGFloat) -> CGFloat { 324 }
 }

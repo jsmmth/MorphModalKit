@@ -26,6 +26,12 @@ public enum ReplaceAnimation: Equatable {
     case slide(_ points: CGFloat)
 }
 
+public enum StickyOption {
+  case none
+  case inherit
+  case sticky(StickyElementsContainer.Type)
+}
+
 public struct ModalOptions {
     // layout
     public var horizontalInset: CGFloat = 10
@@ -33,6 +39,8 @@ public struct ModalOptions {
     public var stackVerticalSpacing: CGFloat = 20
     public var bottomSpacing: CGFloat? = nil
     public var keyboardSpacing: CGFloat = 10
+    public var centerOnIpad: Bool = true
+    public var centerIPadWidthMultiplier: CGFloat = 0.7
 
     // background dimming
     public var dimBackgroundColor: UIColor = .black
@@ -85,7 +93,7 @@ public final class ModalViewController: UIViewController {
     public func present(
         _ modal:ModalView,
         options: ModalOptions = ModalOptions.default,
-        sticky: StickyElementsContainer.Type? = nil,
+        sticky: StickyOption = .none,
         animated:Bool = true,
         showsOverlay:Bool = true,
         completion:(()->Void)? = nil) {
@@ -119,7 +127,7 @@ public final class ModalViewController: UIViewController {
     public func push(
         _ modal:ModalView,
         options: ModalOptions? = nil,
-        sticky: StickyElementsContainer.Type? = nil,
+        sticky: StickyOption = .none,
         animated:Bool = true,
         completion:(()->Void)? = nil)
     {
@@ -131,8 +139,23 @@ public final class ModalViewController: UIViewController {
             view.insertSubview(overlay, at: 0)
             overlay.frame = view.bounds
         }
+        
+        let stickyType: StickyElementsContainer.Type?
+        switch sticky {
+        case .none:
+          stickyType = nil
+        case .sticky(let type):
+          stickyType = type
+        case .inherit:
+          // if there’s a previous container, pull its sticky’s class
+          if let prev = containerStack.last {
+            stickyType = type(of: prev.sticky)
+          } else {
+            stickyType = nil
+          }
+        }
 
-        var c = makeContainer(for: modal, sticky: sticky)
+        var c = makeContainer(for: modal, sticky: stickyType)
         layout(&c)
         c.wrapper.transform = .init(
             translationX: 0,
@@ -162,13 +185,15 @@ public final class ModalViewController: UIViewController {
     ///   - animated: Whether the pop should be animated. Defaults to `true`.
     ///   - completion: An optional closure to be called after presentation completes.
     public func pop(animated:Bool = true, completion:(()->Void)? = nil) {
+        guard !isTransitioning else { return }
         guard let removing = containerStack.last else { return }
 
         // if last card hide the view
         guard containerStack.count > 1 else {
             hide(animated:animated,completion:completion); return
         }
-
+        
+        isTransitioning = true
         let dist  = view.bounds.maxY - removing.wrapper.frame.minY + 50
         let slide = removing.wrapper.transform.translatedBy(x:0,y:dist)
         let next = containerStack[containerStack.count-2]
@@ -185,6 +210,7 @@ public final class ModalViewController: UIViewController {
             removing.modalView.modalDidDisappear()
             next.modalView.modalDidAppear()
             self.refreshScrollDismissBinding()
+            self.isTransitioning = false
             completion?()
         }
     }
@@ -286,6 +312,8 @@ public final class ModalViewController: UIViewController {
     ///   - animated: Whether the pop should be animated. Defaults to `true`.
     ///   - completion: An optional closure to be called after presentation completes.
     public func hide(animated:Bool = true, completion:(()->Void)? = nil) {
+        guard !isTransitioning else { return }
+        isTransitioning = true
         containerStack.forEach{ $0.modalView.modalWillDisappear() }
         animate(options.animation, animated) {
             self.overlay.alpha = 0
@@ -296,6 +324,7 @@ public final class ModalViewController: UIViewController {
         } completion:{
             self.interaction.bindDismissScrollView(nil)
             self.clearAll()
+            self.isTransitioning = false
             completion?()
         }
     }
@@ -311,6 +340,7 @@ public final class ModalViewController: UIViewController {
         var sticky: StickyElementsContainer
     }
     
+    private var isTransitioning: Bool = false
     private var containerStack: [Container] = []
     let interaction = ModalInteractionController()
     private var kbdHeight: CGFloat = 0
@@ -370,7 +400,11 @@ public final class ModalViewController: UIViewController {
     }
 
     private var availableWidth: CGFloat {
-        view.bounds.width - options.horizontalInset * 2
+        if traitCollection.userInterfaceIdiom == .pad && options.centerOnIpad {
+            return view.bounds.width * options.centerIPadWidthMultiplier
+        }
+        
+        return view.bounds.width - options.horizontalInset * 2
     }
     
     /// Re-computes size/position for one container and everything it owns.
@@ -378,11 +412,25 @@ public final class ModalViewController: UIViewController {
         let width  = availableWidth
         let height = clampedHeight(for: c.modalView, width: width)
         c.wrapper.bounds.size = .init(width: width, height: height)
-        let botPad = options.bottomSpacing ?? max(view.safeAreaInsets.bottom, 10)
+        
         let kbReserve = keyboardHeight > 0 ? keyboardHeight + options.keyboardSpacing : 0
-        let bottomY = view.bounds.maxY - botPad - kbReserve
-        c.wrapper.center = .init(x: view.bounds.midX,
-                                 y: bottomY - height / 2)
+        if traitCollection.userInterfaceIdiom == .pad && options.centerOnIpad {
+            // center on iPad, but move up by half the keyboard reserve
+            let centerY = view.bounds.midY - kbReserve/2
+            c.wrapper.center = CGPoint(
+                x: view.bounds.midX,
+                y: centerY
+            )
+        } else {
+            // bottom-anchored on phones (or if centerOnIpad = false)
+            let botPad = options.bottomSpacing ?? max(view.safeAreaInsets.bottom, 10)
+            let bottomY = view.bounds.maxY - botPad - kbReserve
+            c.wrapper.center = CGPoint(
+                x: view.bounds.midX,
+                y: bottomY - height/2
+            )
+        }
+        
         let s = options.cardShadow
         c.wrapper.layer.shadowColor   = s.color.cgColor
         c.wrapper.layer.shadowOpacity = s.opacity
