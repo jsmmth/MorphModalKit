@@ -19,7 +19,7 @@ public extension UIViewController {
     func presentModal(
         _ root: ModalView,
         options: ModalOptions = ModalOptions.default,
-        sticky: StickyElementsContainer.Type? = nil,
+        sticky: StickyOption = .none,
         animated: Bool = true,
         showsOverlay: Bool = true) {
             let host = ModalViewController()

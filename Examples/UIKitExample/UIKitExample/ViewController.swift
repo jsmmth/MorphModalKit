@@ -70,7 +70,9 @@ class ViewController: UIViewController {
         // options.bottomSpacing = 0
         // options.cornerMask = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         
-        self.presentModal(MenuModal(), options: options, sticky: StickyElements.self)
+        // We pass the elements we want to be sticky through morphs when we present the modal
+        // these can be inherited (default) by future pushes or overwritten
+        self.presentModal(MenuModal(), options: options, sticky: .sticky(StickyElements.self))
     }
 }
 

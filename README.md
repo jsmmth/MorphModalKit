@@ -105,13 +105,13 @@ All presentation APIs live on any `UIViewController` once you import MorphModalK
 presentModal(
   ExampleModal(),
   options: ModalOptions.default,
-  sticky: StickyElementsContainer.Type? = nil,
+  sticky: StickyOption = .none,
   animated: true,
   showsOverlay: true
 )
 ```
 
-- **`sticky`**: supply a subclass of `StickyElementsContainer` to render persistent UI during morph (replace) animations.
+- **`sticky` (optional)**: supply a subclass of `StickyElementsContainer` using `.sticky(MySticky.self)` to render persistent UI which sticks around during morph (replace) animations. Allowing you to have a view which acts as a container of shared elements between replace calls.
 - **`options`**: adjust layout, shadows, animation springs, and more (see Configuration below).
 
 ### Pushing & Popping
@@ -119,10 +119,12 @@ presentModal(
 Within a `ModalView`, you can retrieve the host controller:
 
 ```swift
-modalVC?.push(AnotherModal(), sticky: MySticky.self)
-modalVC?.pop()        // back to previous card
-modalVC?.hide()       // dismiss the entire stack
+modalVC?.push(AnotherModal()) // new modalView added to the stack
+modalVC?.pop() // back to previous card
+modalVC?.hide() // dismiss the entire stack
 ```
+
+When you push a new modal to the stack you can also provide `sticky` param (defaults to `.none`) to either inherit the previous modals sticky elements, provide a new sticky with `.sticky(MySticky.self)` element or set it to `.none`.
 
 ### Replace (Morph)
 
