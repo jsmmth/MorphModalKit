@@ -158,7 +158,7 @@ modalVC.replace(
 |`ReplaceAnimation`| Visual |
 |--|--|
 |`.scale` *_(default)_* | New view fades while scaling to 100 % |
-| `.slide(±px)` | Both views slide horizontally by `px` points |
+| `.slide(px)` | Both views slide horizontally by `px` points |
 
 
 ## StickyElementsContainer
