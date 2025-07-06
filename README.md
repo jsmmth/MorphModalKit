@@ -4,6 +4,10 @@
 
 MorphModalKit is a lightweight, flexible UIKit package for building card-stack modals with smooth “morph” (replace) animations and support for sticky elements. It provides a blank-canvas container—feel free to use your own views and components.
 
+<p align="center">
+  <img width="100%" src="./example.gif" alt="MorphModalKit">
+</p>
+
 ---
 
 ## 🚀 Installation
@@ -118,18 +122,6 @@ Within a `ModalView`, you can retrieve the host controller:
 modalVC?.push(AnotherModal(), sticky: MySticky.self)
 modalVC?.pop()        // back to previous card
 modalVC?.hide()       // dismiss the entire stack
-```
-
-> **Tip**: Use this extension to find the current `ModalViewController` from anywhere else:
-
-```swift
-extension UIViewController {
-  var modalVC: ModalViewController? {
-    sequence(first: parent) { $0?.parent }
-      .first(where: { $0 is ModalViewController })
-      as? ModalViewController
-  }
-}
 ```
 
 ### Replace (Morph)
