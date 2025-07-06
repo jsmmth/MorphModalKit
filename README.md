@@ -44,7 +44,7 @@ From here you’re ready to `presentModal(…)` — see below for the full API o
 
 ## Presenting
 
-`ModalViewController` is the brains of the operation.
+`ModalViewController` is the brains of the operation. You can call this from any `UIViewController`.
 
 ```swift
 presentModal(ModalView, animated: Bool = true, showsOverlay: Bool = true)
