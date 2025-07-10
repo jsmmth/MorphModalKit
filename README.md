@@ -4,6 +4,8 @@
 
 MorphModalKit is a lightweight, flexible UIKit package for building card-stack modals with smooth “morph” (replace) animations and support for sticky elements. It provides a blank-canvas container—feel free to use your own views and components.
 
+If you are looking to use SwiftUI you can checkout the [SwiftUI docs](./SwiftUI.md) although this SwiftUI implementation is experimental and for a more stable approach I'd recommend using UIKit for this modal system.
+
 <p align="center">
   <img width="100%" src="./example.gif" alt="MorphModalKit">
 </p>
