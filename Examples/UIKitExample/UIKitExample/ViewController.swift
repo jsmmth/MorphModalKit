@@ -72,6 +72,8 @@ class ViewController: UIViewController {
         
         // We pass the elements we want to be sticky through morphs when we present the modal
         // these can be inherited (default) by future pushes or overwritten
+        // we pass the sticky elements here although we don't show them until the MorphModal (see StickyElements)
+        // this is so we can animate in via fade when we replace MenuModal with MorphModal
         self.presentModal(MenuModal(), options: options, sticky: .sticky(StickyElements.self))
     }
 }
