@@ -221,7 +221,7 @@ presentModal(MyModal(), options: opts, sticky: MySticky.self)
 - **Performance**: Background cards snapshot themselves for smooth animations. Disable via `options.usesSnapshots = false`.
 - **Keyboard Avoidance**: The stack re-layouts on keyboard frame changes, maintaining `keyboardSpacing`.
 - **Scroll-to-Dismiss**: Return your scroll view in `dismissalHandlingScrollView`, helpful when wrapping content in a `UIScrollView` or subclass.
-- **Disable Dismissal**: Override `var canDismiss: Bool { false }` in your `ModalView` You'll still be able to programatically call `.pop`'.
+- **Disable Dismissal**: Override `var canDismiss: Bool { false }` in your `ModalView` You'll still be able to programmatically call `.pop`'.
 
 ---
 
