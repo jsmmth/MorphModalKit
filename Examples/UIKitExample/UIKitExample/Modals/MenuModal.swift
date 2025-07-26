@@ -106,7 +106,7 @@ class MenuModal: UIViewController, ModalView {
     
     // Morph inner content
     @objc private func openMorph() { modalVC?.replace(with: MorphModal(step: .one)) }
-    // Programatically pop a modal
+    // Programmatically pop a modal
     @objc private func popModal() { modalVC?.pop() }
     
     // Example push - same MenuModal
