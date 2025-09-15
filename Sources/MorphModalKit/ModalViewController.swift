@@ -327,6 +327,43 @@ public final class ModalViewController: UIViewController {
             completion?()
         }
     }
+    
+    /// Sets the height of the top-most modal and animates the size change.
+    /// - Parameters:
+    ///   - height: Desired content height. Pass `nil` to return to the modal's preferred height.
+    ///   - animated: Whether to animate the change.
+    ///   - reservePeekSpace: If `true`, we still reserve vertical space for the peek stack (same rule as layout).
+    public func setTopModalHeight(
+        _ height: CGFloat?,
+        animated: Bool = true,
+        reservePeekSpace: Bool = true
+    ) {
+        guard !isTransitioning, !containerStack.isEmpty else { return }
+        containerStack[containerStack.count - 1].overrideHeight = height
+
+        animate(options.animation, animated) {
+            self.layoutAll()
+            self.applyPeekTransforms(animated: true)
+        }
+    }
+    
+    /// Sets the height of a specific modal
+    /// - Parameters:
+    ///   - for: The modal view you want to adjust the height for
+    ///   - to: Desired content height. Pass `nil` to return to the modal's preferred height.
+    ///   - animated: Whether to animate the change.
+    public func setHeight(
+        for modal: ModalView,
+        to height: CGFloat?,
+        animated: Bool = true
+    ) {
+        guard let idx = containerStack.firstIndex(where: { $0.modalView === modal }) else { return }
+        containerStack[idx].overrideHeight = height
+        animate(options.animation, animated) {
+            self.layoutAll()
+            self.applyPeekTransforms(animated: true)
+        }
+    }
 
     // MARK: - Internals
     @MainActor
@@ -337,6 +374,7 @@ public final class ModalViewController: UIViewController {
         var dimView = UIView()
         var snapshot: UIView? = nil
         var sticky: StickyElementsContainer
+        var overrideHeight: CGFloat? = nil
     }
     
     private var isTransitioning: Bool = false
@@ -386,16 +424,16 @@ public final class ModalViewController: UIViewController {
     private func clampedHeight(
         for modal: ModalView,
         width: CGFloat,
-        reservePeekSpace: Bool = true) -> CGFloat
-    {
-        var h = modal.preferredHeight(for: width)
+        reservePeekSpace: Bool = true,
+        overrideHeight: CGFloat? = nil
+    ) -> CGFloat {
+        let requested = overrideHeight ?? modal.preferredHeight(for: width)
         let top = view.safeAreaInsets.top
         let bot = options.bottomSpacing ?? max(view.safeAreaInsets.bottom, 10)
-        let kb = keyboardHeight > 0 ? keyboardHeight + options.keyboardSpacing : 0
-        let peek = reservePeekSpace
-        ? options.stackVerticalSpacing * CGFloat(min(4, options.maxVisibleStack)) : 0
+        let kb  = keyboardHeight > 0 ? keyboardHeight + options.keyboardSpacing : 0
+        let peek = reservePeekSpace ? options.stackVerticalSpacing * CGFloat(min(4, options.maxVisibleStack)) : 0
         let maxH = view.bounds.height - top - bot - kb - peek
-        return min(h, maxH)
+        return min(requested, maxH)
     }
 
     private var availableWidth: CGFloat {
@@ -409,7 +447,7 @@ public final class ModalViewController: UIViewController {
     /// Re-computes size/position for one container and everything it owns.
     private func layout(_ c: inout Container) {
         let width  = availableWidth
-        let height = clampedHeight(for: c.modalView, width: width)
+        let height = clampedHeight(for: c.modalView, width: width, overrideHeight: c.overrideHeight)
         c.wrapper.bounds.size = .init(width: width, height: height)
         
         let kbReserve = keyboardHeight > 0 ? keyboardHeight + options.keyboardSpacing : 0
