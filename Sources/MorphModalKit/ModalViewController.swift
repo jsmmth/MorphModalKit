@@ -100,6 +100,7 @@ public final class ModalViewController: UIViewController {
             self.options = options
             overlayEnabled = showsOverlay
             dismissFromOverlayTaps = dismissableFromOutsideTaps
+            overlay.backgroundColor = overlayEnabled ? options.overlayColor : .clear
             
             if containerStack.isEmpty {
                 push(modal,
@@ -170,18 +171,7 @@ public final class ModalViewController: UIViewController {
         notifyStickyOwnerChange(old: previous, animated: false)
         modal.modalWillAppear()
         animate(options.animation, animated) {
-            
-            if self.overlayEnabled {
-                self.overlay.backgroundColor = self.options.overlayColor
-                self.overlay.alpha = self.options.overlayOpacity
-            } else if self.dismissFromOverlayTaps {
-                self.overlay.backgroundColor = .clear
-                self.overlay.alpha = 1.0
-            } else {
-                self.overlay.backgroundColor = .clear
-                self.overlay.alpha = 0.0
-            }
-            
+            self.overlay.alpha = self.options.overlayOpacity
             self.layoutAll()
             c.wrapper.transform = .identity
             self.applyPeekTransforms(animated:true)
