@@ -95,9 +95,11 @@ public final class ModalViewController: UIViewController {
         sticky: StickyOption = .none,
         animated:Bool = true,
         showsOverlay:Bool = true,
+        dismissableFromOutsideTaps:Bool = true,
         completion:(()->Void)? = nil) {
             self.options = options
             overlayEnabled = showsOverlay
+            dismissFromOverlayTaps = dismissableFromOutsideTaps
             
             if containerStack.isEmpty {
                 push(modal,
@@ -383,6 +385,7 @@ public final class ModalViewController: UIViewController {
     private var kbdHeight: CGFloat = 0
     private var overlayEnabled: Bool = true
     private var keyboardHeight: CGFloat = 0
+    private var dismissFromOverlayTaps: Bool = true
 
     // overlay backdrop
     private lazy var overlay: UIView = {
@@ -548,7 +551,8 @@ public final class ModalViewController: UIViewController {
 
     // MARK: Utils
     @objc private func onOverlayTap(_ g:UITapGestureRecognizer){
-        guard g.state == .ended,
+        guard dismissFromOverlayTaps,
+              g.state == .ended,
               containerStack.last?.modalView.canDismiss ?? true else { return }
         hide()
     }
