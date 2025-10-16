@@ -95,9 +95,12 @@ public final class ModalViewController: UIViewController {
         sticky: StickyOption = .none,
         animated:Bool = true,
         showsOverlay:Bool = true,
+        dismissableFromOutsideTaps:Bool = true,
         completion:(()->Void)? = nil) {
             self.options = options
             overlayEnabled = showsOverlay
+            dismissFromOverlayTaps = dismissableFromOutsideTaps
+            overlay.backgroundColor = overlayEnabled ? options.overlayColor : .clear
             
             if containerStack.isEmpty {
                 push(modal,
@@ -133,7 +136,7 @@ public final class ModalViewController: UIViewController {
         let options = options ?? self.options
         
         // bring overlay if this is the first card
-        if overlayEnabled && containerStack.isEmpty {
+        if containerStack.isEmpty {
             overlay.alpha = 0
             view.insertSubview(overlay, at: 0)
             overlay.frame = view.bounds
@@ -168,7 +171,7 @@ public final class ModalViewController: UIViewController {
         notifyStickyOwnerChange(old: previous, animated: false)
         modal.modalWillAppear()
         animate(options.animation, animated) {
-            self.overlay.alpha = self.overlayEnabled ? self.options.overlayOpacity : 0
+            self.overlay.alpha = self.options.overlayOpacity
             self.layoutAll()
             c.wrapper.transform = .identity
             self.applyPeekTransforms(animated:true)
@@ -383,6 +386,7 @@ public final class ModalViewController: UIViewController {
     private var kbdHeight: CGFloat = 0
     private var overlayEnabled: Bool = true
     private var keyboardHeight: CGFloat = 0
+    private var dismissFromOverlayTaps: Bool = true
 
     // overlay backdrop
     private lazy var overlay: UIView = {
@@ -548,7 +552,8 @@ public final class ModalViewController: UIViewController {
 
     // MARK: Utils
     @objc private func onOverlayTap(_ g:UITapGestureRecognizer){
-        guard g.state == .ended,
+        guard dismissFromOverlayTaps,
+              g.state == .ended,
               containerStack.last?.modalView.canDismiss ?? true else { return }
         hide()
     }
@@ -587,7 +592,7 @@ public final class ModalViewController: UIViewController {
     }
     
     @objc private func handleKeyboard(_ n: Notification) {
-        if let frame = n.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+        if let _ = n.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
             var rawHeight: CGFloat = 0
             if let frame = n.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
                 rawHeight = frame.height - view.safeAreaInsets.bottom
