@@ -170,7 +170,18 @@ public final class ModalViewController: UIViewController {
         notifyStickyOwnerChange(old: previous, animated: false)
         modal.modalWillAppear()
         animate(options.animation, animated) {
-            self.overlay.alpha = self.overlayEnabled ? self.options.overlayOpacity : 0
+            
+            if self.overlayEnabled {
+                self.overlay.backgroundColor = self.options.overlayColor
+                self.overlay.alpha = self.options.overlayOpacity
+            } else if self.dismissFromOverlayTaps {
+                self.overlay.backgroundColor = .clear
+                self.overlay.alpha = 1.0
+            } else {
+                self.overlay.backgroundColor = .clear
+                self.overlay.alpha = 0.0
+            }
+            
             self.layoutAll()
             c.wrapper.transform = .identity
             self.applyPeekTransforms(animated:true)
@@ -591,7 +602,7 @@ public final class ModalViewController: UIViewController {
     }
     
     @objc private func handleKeyboard(_ n: Notification) {
-        if let frame = n.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+        if let _ = n.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
             var rawHeight: CGFloat = 0
             if let frame = n.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
                 rawHeight = frame.height - view.safeAreaInsets.bottom
