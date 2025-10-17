@@ -169,14 +169,14 @@ public final class ModalViewController: UIViewController {
         refreshScrollDismissBinding()
         let previous = containerStack.dropLast().last?.modalView
         notifyStickyOwnerChange(old: previous, animated: false)
-        modal.modalWillAppear()
+        modal.modalWillAppear(fromReplace: false)
         animate(options.animation, animated) {
             self.overlay.alpha = self.options.overlayOpacity
             self.layoutAll()
             c.wrapper.transform = .identity
             self.applyPeekTransforms(animated:true)
         } completion:{
-            modal.modalDidAppear()
+            modal.modalDidAppear(fromReplace: false)
             completion?()
         }
     }
@@ -199,8 +199,8 @@ public final class ModalViewController: UIViewController {
         let dist  = view.bounds.maxY - removing.wrapper.frame.minY + 50
         let slide = removing.wrapper.transform.translatedBy(x:0,y:dist)
         let next = containerStack[containerStack.count-2]
-        removing.modalView.modalWillDisappear()
-        next.modalView.modalWillAppear()
+        removing.modalView.modalWillDisappear(beingReplaced: false)
+        next.modalView.modalWillAppear(fromReplace: false)
         restoreLiveView(&containerStack[containerStack.count-2])// next
         
         animate(options.animation, animated) {
@@ -209,8 +209,8 @@ public final class ModalViewController: UIViewController {
         } completion:{
             self.containerStack.removeLast()
             removing.wrapper.removeFromSuperview()
-            removing.modalView.modalDidDisappear()
-            next.modalView.modalDidAppear()
+            removing.modalView.modalDidDisappear(beingReplaced: false)
+            next.modalView.modalDidAppear(fromReplace: false)
             self.refreshScrollDismissBinding()
             self.isTransitioning = false
             completion?()
@@ -263,8 +263,8 @@ public final class ModalViewController: UIViewController {
         c.modalView = modal
         containerStack[containerStack.count - 1] = c
         refreshScrollDismissBinding()
-        outgoing.modalWillDisappear()
-        modal.modalWillAppear()
+        outgoing.modalWillDisappear(beingReplaced: true)
+        modal.modalWillAppear(fromReplace: true)
         card.layoutIfNeeded()
         
         let slideAmount = (animation == .scale) ? 0 : ( { if case let .slide(px) = animation { return px } ; return 0 }() )
@@ -302,8 +302,8 @@ public final class ModalViewController: UIViewController {
             old.removeFromSuperview()
             outgoing.view.removeFromSuperview()
             outgoing.removeFromParent()
-            outgoing.modalDidDisappear()
-            modal.modalDidAppear()
+            outgoing.modalDidDisappear(beingReplaced: true)
+            modal.modalDidAppear(fromReplace: true)
             completion?()
         }
     }
@@ -316,7 +316,7 @@ public final class ModalViewController: UIViewController {
     public func hide(animated:Bool = true, completion:(()->Void)? = nil) {
         guard !isTransitioning else { return }
         isTransitioning = true
-        containerStack.forEach{ $0.modalView.modalWillDisappear() }
+        containerStack.forEach{ $0.modalView.modalWillDisappear(beingReplaced: false) }
         animate(options.animation, animated) {
             self.overlay.alpha = 0
             self.containerStack.forEach{
