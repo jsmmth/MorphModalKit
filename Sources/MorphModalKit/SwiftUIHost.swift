@@ -217,10 +217,10 @@ public struct MorphModalConfiguration {
     public var preferredHeight: (CGFloat) -> CGFloat = {
         _ in UIScreen.main.bounds.height * 0.5
     }
-    public var onWillAppear: (() -> Void)?    = nil
-    public var onDidAppear:  (() -> Void)?    = nil
-    public var onWillDisappear: (() -> Void)? = nil
-    public var onDidDisappear: (() -> Void)?  = nil
+    public var onWillAppear: ((Bool) -> Void)?    = nil
+    public var onDidAppear:  ((Bool) -> Void)?    = nil
+    public var onWillDisappear: ((Bool) -> Void)? = nil
+    public var onDidDisappear: ((Bool) -> Void)?  = nil
     public init() {}
 }
 
@@ -277,10 +277,10 @@ public final class SwiftUIModalWrapper: UIHostingController<AnyView>, ModalView 
     public func preferredHeight(for width: CGFloat) -> CGFloat {
         preferredHeightClosure(width)
     }
-    public func modalWillAppear() { config.onWillAppear?() }
-    public func modalDidAppear() { config.onDidAppear?() }
-    public func modalWillDisappear() { config.onWillDisappear?() }
-    public func modalDidDisappear() { config.onDidDisappear?() }
+    public func modalWillAppear(fromReplaced: Bool) { config.onWillAppear?(fromReplaced) }
+    public func modalDidAppear(fromReplaced: Bool) { config.onDidAppear?(fromReplaced) }
+    public func modalWillDisappear(beingReplaced: Bool) { config.onWillDisappear?(beingReplaced) }
+    public func modalDidDisappear(beingReplaced: Bool) { config.onDidDisappear?(beingReplaced) }
 
     /// If you really need it, you can cast back:
     public var boxedContent: Any { contentBox }
