@@ -19,10 +19,10 @@ public protocol ModalView: UIViewController {
     var dismissalHandlingScrollView: UIScrollView? { get }
 
     // Lifecycle hooks
-    func modalWillAppear()
-    func modalDidAppear()
-    func modalWillDisappear()
-    func modalDidDisappear()
+    func modalWillAppear(fromReplace: Bool)
+    func modalDidAppear(fromReplace: Bool)
+    func modalWillDisappear(beingReplaced: Bool)
+    func modalDidDisappear(beingReplaced: Bool)
 }
 
 public extension ModalView {
@@ -31,10 +31,10 @@ public extension ModalView {
     var canDismiss: Bool { true }
     var dismissalHandlingScrollView: UIScrollView? { nil }
     
-    func modalWillAppear()    {}
-    func modalDidAppear()     {}
-    func modalWillDisappear() {}
-    func modalDidDisappear()  {}
+    func modalWillAppear(fromReplace: Bool)    {}
+    func modalDidAppear(fromReplace: Bool)     {}
+    func modalWillDisappear(beingReplaced: Bool) {}
+    func modalDidDisappear(beingReplaced: Bool)  {}
     
     // Access to modalVC
     var modalVC: ModalViewController? {

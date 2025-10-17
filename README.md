@@ -74,10 +74,10 @@ public protocol ModalView: UIViewController {
   var dismissalHandlingScrollView: UIScrollView? { get }
 
   // Optional lifecycle hooks
-  func modalWillAppear()
-  func modalDidAppear()
-  func modalWillDisappear()
-  func modalDidDisappear()
+  func modalWillAppear(fromReplaced: Bool)
+  func modalDidAppear(fromReplaced: Bool)
+  func modalWillDisappear(beingReplaced: Bool)
+  func modalDidDisappear(beingReplaced: Bool)
 }
 ```
 

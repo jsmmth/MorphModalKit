@@ -30,6 +30,6 @@ class InputModal: UIViewController, ModalView {
     }
     
 //    func modalWillAppear() { tf.becomeFirstResponder() }
-    func modalWillDisappear() { tf.resignFirstResponder() }
+    func modalWillDisappear(beingReplaced: Bool) { tf.resignFirstResponder() }
     func preferredHeight(for _: CGFloat) -> CGFloat { 500 } // This will get shrunk when the keyboard shows
 }
