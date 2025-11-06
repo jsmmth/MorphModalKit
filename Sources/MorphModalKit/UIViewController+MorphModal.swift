@@ -15,13 +15,14 @@ public extension UIViewController {
     ///   - sticky: Optional sticky elements that remain visible while replacing content (morphing). Defaults to `nil`.
     ///   - animated: Whether to animate the presentation. Defaults to `true`.
     ///   - showsOverlay: Whether to show the dimmed background overlay. Defaults to `true`.
-    ///   - dismissable: Whether the modal can be dismissed. Defaults to `true`.
+    ///   - dismissableFromOutsideTaps: Whether the modal can be dismissed from outside taps. Defaults to `true`.
     func presentModal(
         _ root: ModalView,
         options: ModalOptions = ModalOptions.default,
         sticky: StickyOption = .none,
         animated: Bool = true,
-        showsOverlay: Bool = true) {
+        showsOverlay: Bool = true,
+        dismissableFromOutsideTaps: Bool = true) {
             let host = ModalViewController()
             host.modalPresentationStyle = .overFullScreen
             host.modalTransitionStyle   = .crossDissolve
@@ -31,7 +32,40 @@ public extension UIViewController {
                     options: options,
                     sticky: sticky,
                     animated: animated,
-                    showsOverlay: showsOverlay)
+                    showsOverlay: showsOverlay,
+                    dismissableFromOutsideTaps: dismissableFromOutsideTaps)
             }
+    }
+}
+
+
+public extension UIViewController {
+    /// Attaches a ModalViewController as a child overlay instead of presenting.
+    func presentPassThroughModal(
+        _ root: ModalView,
+        options: ModalOptions = .default,
+        sticky: StickyOption = .none,
+        animated: Bool = true,
+        showsOverlay: Bool = true,
+        dismissableFromOutsideTaps: Bool = true,
+        passThroughTouches: Bool = true
+    ) {
+        let host = ModalViewController()
+        host.options = options
+        addChild(host)
+        host.view.frame = view.bounds
+        host.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(host.view)
+        host.didMove(toParent: self)
+        
+        host.present(
+            root,
+            options: options,
+            sticky: sticky,
+            animated: animated,
+            showsOverlay: showsOverlay,
+            dismissableFromOutsideTaps: dismissableFromOutsideTaps,
+            passThroughTouches: passThroughTouches
+        )
     }
 }
