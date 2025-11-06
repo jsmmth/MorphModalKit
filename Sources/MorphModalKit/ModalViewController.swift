@@ -100,6 +100,7 @@ public final class ModalViewController: UIViewController {
         completion:(()->Void)? = nil) {
             self.options = options
             overlayEnabled = showsOverlay
+            self.passThroughTouches = passThroughTouches
             dismissFromOverlayTaps = dismissableFromOutsideTaps && !passThroughTouches
             
             overlay.isUserInteractionEnabled = dismissFromOverlayTaps
