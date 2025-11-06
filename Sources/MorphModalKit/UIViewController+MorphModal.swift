@@ -26,7 +26,7 @@ public extension UIViewController {
         dismissableFromOutsideTaps: Bool = true,
         passThroughTouches: Bool = false) {
             let host = ModalViewController()
-            host.modalPresentationStyle = .overFullScreen
+            host.modalPresentationStyle = passThroughTouches ? .overCurrentContext : .overFullScreen
             host.modalTransitionStyle   = .crossDissolve
             present(host, animated: false) {
                 host.present(
