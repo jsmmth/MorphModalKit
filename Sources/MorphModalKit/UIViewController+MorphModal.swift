@@ -16,15 +16,13 @@ public extension UIViewController {
     ///   - animated: Whether to animate the presentation. Defaults to `true`.
     ///   - showsOverlay: Whether to show the dimmed background overlay. Defaults to `true`.
     ///   - dismissableFromOutsideTaps: Whether the modal can be dismissed from outside taps. Defaults to `true`.
-    ///   - passThroughTouches: Whether the VC which is presenting can receieve touch events. Defaults to `false`.
     func presentModal(
         _ root: ModalView,
         options: ModalOptions = ModalOptions.default,
         sticky: StickyOption = .none,
         animated: Bool = true,
         showsOverlay: Bool = true,
-        dismissableFromOutsideTaps: Bool = true,
-        passThroughTouches: Bool = false) {
+        dismissableFromOutsideTaps: Bool = true) {
             let host = ModalViewController()
             host.modalPresentationStyle = .overFullScreen
             host.modalTransitionStyle   = .crossDissolve
@@ -35,8 +33,7 @@ public extension UIViewController {
                     sticky: sticky,
                     animated: animated,
                     showsOverlay: showsOverlay,
-                    dismissableFromOutsideTaps: dismissableFromOutsideTaps,
-                    passThroughTouches: passThroughTouches)
+                    dismissableFromOutsideTaps: dismissableFromOutsideTaps)
             }
     }
 }
@@ -44,14 +41,14 @@ public extension UIViewController {
 
 public extension UIViewController {
     /// Attaches a ModalViewController as a child overlay instead of presenting.
-    func presentModalInCurrentVC(
+    func presentPassThroughModal(
         _ root: ModalView,
         options: ModalOptions = .default,
         sticky: StickyOption = .none,
         animated: Bool = true,
         showsOverlay: Bool = true,
         dismissableFromOutsideTaps: Bool = true,
-        passThroughTouches: Bool = false
+        passThroughTouches: Bool = true
     ) {
         let host = ModalViewController()
         host.options = options

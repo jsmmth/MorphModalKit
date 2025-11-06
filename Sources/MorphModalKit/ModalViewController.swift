@@ -141,7 +141,7 @@ public final class ModalViewController: UIViewController {
         let options = options ?? self.options
         
         // bring overlay if this is the first card
-        if containerStack.isEmpty, !passThroughTouches {
+        if containerStack.isEmpty {
             overlay.alpha = 0
             view.insertSubview(overlay, at: 0)
             overlay.frame = view.bounds
