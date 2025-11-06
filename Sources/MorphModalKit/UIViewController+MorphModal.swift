@@ -44,7 +44,7 @@ public extension UIViewController {
 
 public extension UIViewController {
     /// Attaches a ModalViewController as a child overlay instead of presenting.
-    func presnetModalInCurrentVC(
+    func presentModalInCurrentVC(
         _ root: ModalView,
         options: ModalOptions = .default,
         sticky: StickyOption = .none,
