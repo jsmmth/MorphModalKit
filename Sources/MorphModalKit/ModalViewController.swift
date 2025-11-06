@@ -106,6 +106,8 @@ public final class ModalViewController: UIViewController {
             overlay.isUserInteractionEnabled = dismissFromOverlayTaps
             overlay.backgroundColor = overlayEnabled ? options.overlayColor : .clear
             
+            interaction.setGestureEnabled(!passThroughTouches)
+            
             if containerStack.isEmpty {
                 push(modal,
                      options: options,
