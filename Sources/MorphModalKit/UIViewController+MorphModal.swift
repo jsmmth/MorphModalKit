@@ -26,7 +26,7 @@ public extension UIViewController {
         dismissableFromOutsideTaps: Bool = true,
         passThroughTouches: Bool = false) {
             let host = ModalViewController()
-            host.modalPresentationStyle = passThroughTouches ? .overCurrentContext : .overFullScreen
+            host.modalPresentationStyle = .overFullScreen
             host.modalTransitionStyle   = .crossDissolve
             present(host, animated: false) {
                 host.present(
@@ -38,5 +38,37 @@ public extension UIViewController {
                     dismissableFromOutsideTaps: dismissableFromOutsideTaps,
                     passThroughTouches: passThroughTouches)
             }
+    }
+}
+
+
+public extension UIViewController {
+    /// Attaches a ModalViewController as a child overlay instead of presenting.
+    func presnetModalInCurrentVC(
+        _ root: ModalView,
+        options: ModalOptions = .default,
+        sticky: StickyOption = .none,
+        animated: Bool = true,
+        showsOverlay: Bool = true,
+        dismissableFromOutsideTaps: Bool = true,
+        passThroughTouches: Bool = false
+    ) {
+        let host = ModalViewController()
+        host.options = options
+        addChild(host)
+        host.view.frame = view.bounds
+        host.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(host.view)
+        host.didMove(toParent: self)
+        
+        host.present(
+            root,
+            options: options,
+            sticky: sticky,
+            animated: animated,
+            showsOverlay: showsOverlay,
+            dismissableFromOutsideTaps: dismissableFromOutsideTaps,
+            passThroughTouches: passThroughTouches
+        )
     }
 }

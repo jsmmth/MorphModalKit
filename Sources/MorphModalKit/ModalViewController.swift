@@ -650,8 +650,15 @@ public final class ModalViewController: UIViewController {
         containerStack.removeAll()
         updateHitTesting()
         
-        guard options.removesSelfWhenCleared else { return }
-        self.dismiss(animated: false)
+        if options.removesSelfWhenCleared {
+            if parent != nil {
+                willMove(toParent: nil)
+                view.removeFromSuperview()
+                removeFromParent()
+            } else {
+                dismiss(animated: false)
+            }
+        }
     }
 
     private func makeContainer(for modal: ModalView, sticky explicit: StickyElementsContainer.Type?) -> Container {
