@@ -374,7 +374,7 @@ public final class ModalViewController: UIViewController {
 
     // MARK: - Internals
     @MainActor
-    private struct Container {
+    struct Container {
         let wrapper: UIView
         let card: UIView
         var modalView: ModalView
@@ -385,13 +385,13 @@ public final class ModalViewController: UIViewController {
     }
     
     private var isTransitioning: Bool = false
-    private var containerStack: [Container] = []
+    private(set) var containerStack: [Container] = []
     let interaction = ModalInteractionController()
     private var kbdHeight: CGFloat = 0
     private var overlayEnabled: Bool = true
     private var keyboardHeight: CGFloat = 0
     private var dismissFromOverlayTaps: Bool = true
-    private var passThroughTouches: Bool = false
+    private(set) var passThroughTouches: Bool = false
 
     // overlay backdrop
     private lazy var overlay: UIView = {
@@ -410,6 +410,12 @@ public final class ModalViewController: UIViewController {
         registerKeyboard()
         overlay.addGestureRecognizer(
             UITapGestureRecognizer(target: self, action: #selector(onOverlayTap)))
+    }
+    
+    public override func loadView() {
+        let v = PossiblePassThroughView()
+        v.modalVC = self
+        self.view = v
     }
     
     deinit {
