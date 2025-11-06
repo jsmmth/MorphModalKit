@@ -93,13 +93,16 @@ public final class ModalViewController: UIViewController {
         _ modal:ModalView,
         options: ModalOptions = ModalOptions.default,
         sticky: StickyOption = .none,
-        animated:Bool = true,
-        showsOverlay:Bool = true,
-        dismissableFromOutsideTaps:Bool = true,
+        animated: Bool = true,
+        showsOverlay: Bool = true,
+        dismissableFromOutsideTaps: Bool = true,
+        passThroughTouches: Bool = false,
         completion:(()->Void)? = nil) {
             self.options = options
             overlayEnabled = showsOverlay
-            dismissFromOverlayTaps = dismissableFromOutsideTaps
+            dismissFromOverlayTaps = dismissableFromOutsideTaps && !passThroughTouches
+            
+            overlay.isUserInteractionEnabled = dismissFromOverlayTaps
             overlay.backgroundColor = overlayEnabled ? options.overlayColor : .clear
             
             if containerStack.isEmpty {
@@ -110,6 +113,7 @@ public final class ModalViewController: UIViewController {
                      completion:completion)
                 return
             }
+            
             hide(completion: {
                 self.push(modal,
                           options: options,
@@ -387,6 +391,7 @@ public final class ModalViewController: UIViewController {
     private var overlayEnabled: Bool = true
     private var keyboardHeight: CGFloat = 0
     private var dismissFromOverlayTaps: Bool = true
+    private var passThroughTouches: Bool = false
 
     // overlay backdrop
     private lazy var overlay: UIView = {

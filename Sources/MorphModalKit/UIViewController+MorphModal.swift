@@ -15,13 +15,16 @@ public extension UIViewController {
     ///   - sticky: Optional sticky elements that remain visible while replacing content (morphing). Defaults to `nil`.
     ///   - animated: Whether to animate the presentation. Defaults to `true`.
     ///   - showsOverlay: Whether to show the dimmed background overlay. Defaults to `true`.
-    ///   - dismissable: Whether the modal can be dismissed. Defaults to `true`.
+    ///   - dismissableFromOutsideTaps: Whether the modal can be dismissed from outside taps. Defaults to `true`.
+    ///   - passThroughTouches: Whether the VC which is presenting can receieve touch events. Defaults to `false`.
     func presentModal(
         _ root: ModalView,
         options: ModalOptions = ModalOptions.default,
         sticky: StickyOption = .none,
         animated: Bool = true,
-        showsOverlay: Bool = true) {
+        showsOverlay: Bool = true,
+        dismissableFromOutsideTaps: Bool = true,
+        passThroughTouches: Bool = false) {
             let host = ModalViewController()
             host.modalPresentationStyle = .overFullScreen
             host.modalTransitionStyle   = .crossDissolve
@@ -31,7 +34,9 @@ public extension UIViewController {
                     options: options,
                     sticky: sticky,
                     animated: animated,
-                    showsOverlay: showsOverlay)
+                    showsOverlay: showsOverlay,
+                    dismissableFromOutsideTaps: dismissableFromOutsideTaps,
+                    passThroughTouches: passThroughTouches)
             }
     }
 }
