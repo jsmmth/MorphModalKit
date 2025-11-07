@@ -13,6 +13,7 @@ public protocol ModalView: UIViewController {
 
     // Dismissal policy
     var canDismiss: Bool { get }
+    var isDraggable: Bool { get }
     
     /// If you return a scroll-view here MorphModalKit will wire it up
     /// so a downward drag at its *top* dismisses the current sheet.
@@ -29,6 +30,7 @@ public extension ModalView {
     // Defaults
     func preferredHeight(for width: CGFloat) -> CGFloat { 0 }
     var canDismiss: Bool { true }
+    var isDraggable: Bool { true }
     var dismissalHandlingScrollView: UIScrollView? { nil }
     
     func modalWillAppear(fromReplace: Bool)    {}

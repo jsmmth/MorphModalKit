@@ -106,6 +106,8 @@ public final class ModalViewController: UIViewController {
             overlay.isUserInteractionEnabled = dismissFromOverlayTaps
             overlay.backgroundColor = overlayEnabled ? options.overlayColor : .clear
             
+            interaction.setGestureEnabled(modal.isDraggable)
+            
             if containerStack.isEmpty {
                 push(modal,
                      options: options,
@@ -180,6 +182,7 @@ public final class ModalViewController: UIViewController {
             self.layoutAll()
             c.wrapper.transform = .identity
             self.applyPeekTransforms(animated:true)
+            self.interaction.setGestureEnabled(modal.isDraggable)
         } completion:{
             modal.modalDidAppear(fromReplace: false)
             completion?()
@@ -216,6 +219,7 @@ public final class ModalViewController: UIViewController {
             removing.wrapper.removeFromSuperview()
             removing.modalView.modalDidDisappear(beingReplaced: false)
             next.modalView.modalDidAppear(fromReplace: false)
+            self.interaction.setGestureEnabled(next.modalView.isDraggable)
             self.refreshScrollDismissBinding()
             self.isTransitioning = false
             completion?()
@@ -303,6 +307,7 @@ public final class ModalViewController: UIViewController {
             }
             self.applyPeekTransforms(animated: true)
             self.notifyStickyOwnerChange(old: outgoing, animated: false)
+            self.interaction.setGestureEnabled(modal.isDraggable)
         } completion: {
             old.removeFromSuperview()
             outgoing.view.removeFromSuperview()
