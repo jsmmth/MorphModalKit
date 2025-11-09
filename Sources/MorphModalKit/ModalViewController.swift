@@ -36,11 +36,14 @@ public struct ModalOptions {
     // layout
     public var horizontalInset: CGFloat = 10
     public var cornerRadius: CGFloat = 32
+    public var innerCornerRadius: CGFloat? = nil
     public var stackVerticalSpacing: CGFloat = 20
     public var bottomSpacing: CGFloat? = nil
     public var keyboardSpacing: CGFloat = 10
     public var centerOnIpad: Bool = true
     public var centerIPadWidthMultiplier: CGFloat = 0.7
+    public var handlebarHeight: CGFloat = 4
+    public var handlebarWidth: CGFloat = 52
 
     // background dimming
     public var dimBackgroundColor: UIColor = .black
@@ -56,6 +59,7 @@ public struct ModalOptions {
         .layerMinXMinYCorner, .layerMaxXMinYCorner,
         .layerMinXMaxYCorner, .layerMaxXMaxYCorner
     ]
+    public var innerCornerMask: CACornerMask? = nil
     public var showsHandle: Bool = true
     public var handleColor: UIColor = .tertiarySystemGroupedBackground
 
@@ -678,7 +682,6 @@ public final class ModalViewController: UIViewController {
         wrapper.layer.shadowOffset = s.offset
         wrapper.layer.maskedCorners = options.cornerMask
         wrapper.clipsToBounds = false
-        wrapper.backgroundColor = options.modalBackgroundColor
 
         // card (clips content)
         let card = UIView()
@@ -713,25 +716,41 @@ public final class ModalViewController: UIViewController {
             let handle = UIView()
             handle.backgroundColor = options.handleColor
             handle.layer.cornerCurve = .continuous
-            handle.layer.cornerRadius = 2
+            handle.layer.cornerRadius = options.handlebarHeight / 2
             handle.translatesAutoresizingMaskIntoConstraints = false
             wrapper.addSubview(handle)
             NSLayoutConstraint.activate([
-                handle.widthAnchor.constraint(equalToConstant: 52),
-                handle.heightAnchor.constraint(equalToConstant: 4),
+                handle.widthAnchor.constraint(equalToConstant: options.handlebarWidth),
+                handle.heightAnchor.constraint(equalToConstant: options.handlebarHeight),
                 handle.topAnchor.constraint(equalTo: wrapper.topAnchor, constant: 8),
                 handle.centerXAnchor.constraint(equalTo: wrapper.centerXAnchor),
             ])
         }
 
         // live content
-        modal.view.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(modal.view)
+        let modalContainer = UIView()
+        modalContainer.backgroundColor = options.modalBackgroundColor
+        modalContainer.translatesAutoresizingMaskIntoConstraints = false
+        modalContainer.layer.cornerRadius = options.innerCornerRadius ?? .zero
+        if let cornerMasks = options.innerCornerMask {
+            modalContainer.layer.maskedCorners = cornerMasks
+        }
+        modalContainer.clipsToBounds = true
+        card.addSubview(modalContainer)
         NSLayoutConstraint.activate([
-            modal.view.leadingAnchor.constraint(equalTo: card.leadingAnchor),
-            modal.view.trailingAnchor.constraint(equalTo: card.trailingAnchor),
-            modal.view.topAnchor.constraint(equalTo: card.topAnchor),
-            modal.view.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+            modalContainer.leadingAnchor.constraint(equalTo: card.leadingAnchor),
+            modalContainer.trailingAnchor.constraint(equalTo: card.trailingAnchor),
+            modalContainer.topAnchor.constraint(equalTo: card.topAnchor),
+            modalContainer.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+        ])
+        
+        modal.view.translatesAutoresizingMaskIntoConstraints = false
+        modalContainer.addSubview(modal.view)
+        NSLayoutConstraint.activate([
+            modal.view.leadingAnchor.constraint(equalTo: modalContainer.leadingAnchor),
+            modal.view.trailingAnchor.constraint(equalTo: modalContainer.trailingAnchor),
+            modal.view.topAnchor.constraint(equalTo: modalContainer.topAnchor),
+            modal.view.bottomAnchor.constraint(equalTo: modalContainer.bottomAnchor)
         ])
         modal.didMove(toParent: self)
 
