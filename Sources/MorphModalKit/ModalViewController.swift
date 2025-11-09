@@ -680,12 +680,12 @@ public final class ModalViewController: UIViewController {
         wrapper.layer.shadowOffset = s.offset
         wrapper.layer.maskedCorners = options.cornerMask
         wrapper.clipsToBounds = false
-        wrapper.backgroundColor = options.modalBackgroundColor
 
         // card (clips content)
         let card = UIView()
         card.layer.cornerRadius = options.innerCornerRadius ?? options.cornerRadius
         card.layer.maskedCorners = options.innerCornerMask ?? options.cornerMask
+        card.backgroundColor = options.modalBackgroundColor
         card.clipsToBounds = true
         wrapper.addSubview(card)
         card.translatesAutoresizingMaskIntoConstraints = false
