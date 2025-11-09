@@ -179,29 +179,36 @@ Pass your sticky class to `present(…, sticky:)` or `push(…, sticky:)`.
 
 Customize every aspect via `ModalOptions`:
 
-| Property                   | What it does                                             | Default                           |
-|----------------------------|----------------------------------------------------------|-----------------------------------|
-| `horizontalInset`          | Side margins of each card                                | `10`                              |
-| `bottomSpacing`            | Space from bottom (nil = safe area + 10)                 | `nil`                             |
-| `stackVerticalSpacing`     | Gap between stacked cards                                | `20`                              |
-| `keyboardSpacing`          | Gap between the bottom of the card and the keyboard      | `10`                              |
-| `cornerRadius`             | Card corner radius                                       | `32`                              |
-| `cornerMask`               | Card corner mask                                         | `[.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner]` |
-| `maxVisibleStack`          | How many cards peek behind the front card                | `2`                               |
-| `dimBackgroundColor`       | Color of background cards                                | `.black`                          |
-| `dimOpacityMultiplier`     | Darkness of background cards                             | `0.06`                            |
-| `overlayColor`             | Overlay backdrop color                                   | `.black`                          |
-| `overlayOpacity`           | Overlay backdrop opacity                                 | `0.2`                             |
-| `modalBackgroundColor`     | Base card background                                     | `.secondarySystemGroupedBackground` |
-| `animation`                | Spring settings for present/push/pop                     | `(0.4, damping:0.86, velocity:0.8)` |
-| `morphAnimation`           | Spring settings for replace (morph)                      | `(0.4, damping:0.95, velocity:1)` |
-| `cardShadow`               | Card shadow `(color, opacity, radius, offset)`           | `(.black, 0.12, 9, (0,2))`        |
-| `usesSnapshots`            | Snapshot offscreen cards for performance                 | `true`                            |
-| `usesSnapshotsForMorph`    | Snapshot during morph replacements                       | `false`                           |
-| `showsHandle`              | Show drag-handle when dismissable                        | `true`                            |
-| `handleColor`              | Color of the drag-handle                                 | `.tertiarySystemGroupedBackground` |
-| `centerOnIpad`             | Whether ot not the modal should be centered on iPad or not | `true`                          |
-| `centerIPadWidthMultiplier`| Width of the modal when centered on iPad                 | `0.7`                             |
+| Property                   | What it does                                                                | Default                           |
+|----------------------------|-----------------------------------------------------------------------------|-----------------------------------|
+| `horizontalInset`          | Side margins of each card                                                   | `10`                              |
+| `bottomSpacing`            | Space from bottom (nil = safe area + 10)                                    | `nil`                             |
+| `stackVerticalSpacing`     | Gap between stacked cards                                                   | `20`                              |
+| `keyboardSpacing`          | Gap between the bottom of the card and the keyboard                         | `10`                              |
+| `handlebarWidth`           | Width of the handlebar                                                      | `52`                              |
+| `handlebarHeight`          | Height of the handlebar                                                     | `4`                               |
+| `keyboardSpacing`          | Gap between the bottom of the card and the keyboard                         | `10`                              |
+| `cornerRadius`             | Card corner radius                                                          | `32`                              |
+| `innerCornerRadius`        | Card corner radius for inner wrapper (useful for top radius being unique)   | `nil`                             |
+| `innerCornerMask`          | Card corner mask for inner wrapper                                          | `nil`                             |
+| `cornerMask`               | Card corner mask                                                            | `[.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner]` |
+| `maxVisibleStack`          | How many cards peek behind the front card                                   | `2`                               |
+| `dimBackgroundColor`       | Color of background cards                                                   | `.black`                          |
+| `dimOpacityMultiplier`     | Darkness of background cards                                                | `0.06`                            |
+| `overlayColor`             | Overlay backdrop color                                                      | `.black`                          |
+| `overlayOpacity`           | Overlay backdrop opacity                                                    | `0.2`                             |
+| `modalBackgroundColor`     | Base card background                                                        | `.secondarySystemGroupedBackground` |
+| `animation`                | Spring settings for present/push/pop                                        | `(0.4, damping:0.86, velocity:0.8)` |
+| `morphAnimation`           | Spring settings for replace (morph)                                         | `(0.4, damping:0.95, velocity:1)` |
+| `cardShadow`               | Card shadow `(color, opacity, radius, offset)`                              | `(.black, 0.12, 9, (0,2))`        |
+| `usesSnapshots`            | Snapshot offscreen cards for performance                                    | `true`                            |
+| `usesSnapshotsForMorph`    | Snapshot during morph replacements                                          | `false`                           |
+| `showsHandle`              | Show drag-handle when dismissable                                           | `true`                            |
+| `handleColor`              | Color of the drag-handle                                                    | `.tertiarySystemGroupedBackground` |
+| `enableGlass`              | Enables liquid glass background effect (iOS 26 only)                        | `false`                           |
+| `glassStyle`               | When enableGlass is true allows you to change glass style (iOS 26 only)     | `.regular`                        |
+| `centerOnIpad`             | Whether ot not the modal should be centered on iPad or not                  | `true`                            |
+| `centerIPadWidthMultiplier`| Width of the modal when centered on iPad                                    | `0.7`                             |
 
 **Example: Full-width, bottom-pinned modal**
 

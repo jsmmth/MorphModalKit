@@ -32,6 +32,19 @@ public enum StickyOption {
   case sticky(StickyElementsContainer.Type)
 }
 
+public enum ModalGlassStyle {
+    case regular
+    case clear
+    
+    @available(iOS 26.0, *)
+    var uiStyle: UIGlassEffect.Style {
+        switch self {
+        case .regular: return .regular
+        case .clear: return .clear
+        }
+    }
+}
+
 public struct ModalOptions {
     // layout
     public var horizontalInset: CGFloat = 10
@@ -44,6 +57,7 @@ public struct ModalOptions {
     public var centerIPadWidthMultiplier: CGFloat = 0.7
     public var handlebarHeight: CGFloat = 4
     public var handlebarWidth: CGFloat = 52
+    public var glassStyle: ModalGlassStyle = .regular
 
     // background dimming
     public var dimBackgroundColor: UIColor = .black
@@ -62,6 +76,7 @@ public struct ModalOptions {
     public var innerCornerMask: CACornerMask? = nil
     public var showsHandle: Bool = true
     public var handleColor: UIColor = .tertiarySystemGroupedBackground
+    public var enableGlass: Bool = false /// for iOS 26 only
 
     // behavior
     public var usesSnapshots: Bool = true
@@ -729,7 +744,20 @@ public final class ModalViewController: UIViewController {
 
         // live content
         let modalContainer = UIView()
-        modalContainer.backgroundColor = options.modalBackgroundColor
+        
+        if options.enableGlass, #available(iOS 26.0, *) {
+            modalContainer.backgroundColor = .clear
+            let glass = UIGlassEffect(style: options.glassStyle.uiStyle)
+            let glassView = UIVisualEffectView(effect: glass)
+            glassView.frame = modalContainer.bounds
+            glassView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            glassView.layer.cornerRadius = options.cornerRadius
+            glassView.layer.maskedCorners = options.cornerMask
+            modalContainer.insertSubview(glassView, at: 0)
+        } else {
+            modalContainer.backgroundColor = options.modalBackgroundColor
+        }
+
         modalContainer.translatesAutoresizingMaskIntoConstraints = false
         modalContainer.layer.cornerRadius = options.innerCornerRadius ?? .zero
         if let cornerMasks = options.innerCornerMask {
