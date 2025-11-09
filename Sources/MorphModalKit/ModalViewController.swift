@@ -36,6 +36,7 @@ public struct ModalOptions {
     // layout
     public var horizontalInset: CGFloat = 10
     public var cornerRadius: CGFloat = 32
+    public var innerCornerRadius: CGFloat? = nil
     public var stackVerticalSpacing: CGFloat = 20
     public var bottomSpacing: CGFloat? = nil
     public var keyboardSpacing: CGFloat = 10
@@ -56,6 +57,7 @@ public struct ModalOptions {
         .layerMinXMinYCorner, .layerMaxXMinYCorner,
         .layerMinXMaxYCorner, .layerMaxXMaxYCorner
     ]
+    public var innerCornerMask: CACornerMask? = nil
     public var showsHandle: Bool = true
     public var handleColor: UIColor = .tertiarySystemGroupedBackground
 
@@ -682,8 +684,8 @@ public final class ModalViewController: UIViewController {
 
         // card (clips content)
         let card = UIView()
-        card.layer.cornerRadius = options.cornerRadius
-        card.layer.maskedCorners = options.cornerMask
+        card.layer.cornerRadius = options.innerCornerRadius ?? options.cornerRadius
+        card.layer.maskedCorners = options.innerCornerMask ?? options.cornerMask
         card.clipsToBounds = true
         wrapper.addSubview(card)
         card.translatesAutoresizingMaskIntoConstraints = false
