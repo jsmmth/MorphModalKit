@@ -168,13 +168,13 @@ public final class ModalViewController: UIViewController {
 
         var c = makeContainer(for: modal, sticky: stickyType)
         layout(&c)
-        c.wrapper.transform = .init(
+        c.container.transform = .init(
             translationX: 0,
-            y: view.bounds.maxY - c.wrapper.frame.minY + 50)
-        view.addSubview(c.wrapper)
+            y: view.bounds.maxY - c.container.frame.minY + 50)
+        view.addSubview(c.container)
         containerStack.append(c)
         updateHitTesting()
-        updateSnapshots(newFront: c.wrapper)
+        updateSnapshots(newFront: c.container)
         refreshScrollDismissBinding()
         let previous = containerStack.dropLast().last?.modalView
         notifyStickyOwnerChange(old: previous, animated: false)
@@ -182,7 +182,7 @@ public final class ModalViewController: UIViewController {
         animate(options.animation, animated) {
             self.overlay.alpha = self.options.overlayOpacity
             self.layoutAll()
-            c.wrapper.transform = .identity
+            c.container.transform = .identity
             self.applyPeekTransforms(animated:true)
             self.interaction.setGestureEnabled(modal.isDraggable)
         } completion:{
@@ -206,19 +206,19 @@ public final class ModalViewController: UIViewController {
         }
         
         isTransitioning = true
-        let dist  = view.bounds.maxY - removing.wrapper.frame.minY + 50
-        let slide = removing.wrapper.transform.translatedBy(x:0,y:dist)
+        let dist  = view.bounds.maxY - removing.container.frame.minY + 50
+        let slide = removing.container.transform.translatedBy(x:0,y:dist)
         let next = containerStack[containerStack.count-2]
         removing.modalView.modalWillDisappear(beingReplaced: false)
         next.modalView.modalWillAppear(fromReplace: false)
         restoreLiveView(&containerStack[containerStack.count-2])// next
         
         animate(options.animation, animated) {
-            removing.wrapper.transform = slide
-            self.applyPeekTransforms(animated:true, excluding: removing.wrapper)
+            removing.container.transform = slide
+            self.applyPeekTransforms(animated:true, excluding: removing.container)
         } completion:{
             self.containerStack.removeLast()
-            removing.wrapper.removeFromSuperview()
+            removing.container.removeFromSuperview()
             removing.modalView.modalDidDisappear(beingReplaced: false)
             next.modalView.modalDidAppear(fromReplace: false)
             self.interaction.setGestureEnabled(next.modalView.isDraggable)
@@ -332,8 +332,8 @@ public final class ModalViewController: UIViewController {
         animate(options.animation, animated) {
             self.overlay.alpha = 0
             self.containerStack.forEach{
-                let dist = self.view.bounds.maxY - $0.wrapper.frame.minY + 50
-                $0.wrapper.transform = $0.wrapper.transform.translatedBy(x: 0, y: dist)
+                let dist = self.view.bounds.maxY - $0.container.frame.minY + 50
+                $0.container.transform = $0.container.transform.translatedBy(x: 0, y: dist)
             }
         } completion:{
             self.interaction.bindDismissScrollView(nil)
@@ -385,6 +385,7 @@ public final class ModalViewController: UIViewController {
     struct Container {
         let wrapper: UIView
         let card: UIView
+        let container: UIView
         var modalView: ModalView
         var dimView = UIView()
         var snapshot: UIView? = nil
@@ -471,13 +472,13 @@ public final class ModalViewController: UIViewController {
     private func layout(_ c: inout Container) {
         let width  = availableWidth
         let height = clampedHeight(for: c.modalView, width: width, overrideHeight: c.overrideHeight)
-        c.wrapper.bounds.size = .init(width: width, height: height)
+        c.container.bounds.size = .init(width: width, height: height)
         
         let kbReserve = keyboardHeight > 0 ? keyboardHeight + options.keyboardSpacing : 0
         if traitCollection.userInterfaceIdiom == .pad && options.centerOnIpad {
             // center on iPad, but move up by half the keyboard reserve
             let centerY = view.bounds.midY - kbReserve/2
-            c.wrapper.center = CGPoint(
+            c.container.center = CGPoint(
                 x: view.bounds.midX,
                 y: centerY
             )
@@ -485,23 +486,23 @@ public final class ModalViewController: UIViewController {
             // bottom-anchored on phones (or if centerOnIpad = false)
             let botPad = options.bottomSpacing ?? max(view.safeAreaInsets.bottom, 10)
             let bottomY = view.bounds.maxY - botPad - kbReserve
-            c.wrapper.center = CGPoint(
+            c.container.center = CGPoint(
                 x: view.bounds.midX,
                 y: bottomY - height/2
             )
         }
         
         let s = options.cardShadow
-        c.wrapper.layer.shadowColor   = s.color.cgColor
-        c.wrapper.layer.shadowOpacity = s.opacity
-        c.wrapper.layer.shadowRadius  = s.radius
-        c.wrapper.layer.shadowOffset  = s.offset
-        c.wrapper.layer.shadowPath    = UIBezierPath(
-                roundedRect: c.wrapper.bounds,
+        c.container.layer.shadowColor   = s.color.cgColor
+        c.container.layer.shadowOpacity = s.opacity
+        c.container.layer.shadowRadius  = s.radius
+        c.container.layer.shadowOffset  = s.offset
+        c.container.layer.shadowPath    = UIBezierPath(
+                roundedRect: c.container.bounds,
                 byRoundingCorners: .allCorners,
                 cornerRadii: .init(width: options.cornerRadius, height: options.cornerRadius)
         ).cgPath
-        c.wrapper.layoutIfNeeded()
+        c.container.layoutIfNeeded()
     }
 
     private func applyPeekTransforms(
@@ -511,26 +512,26 @@ public final class ModalViewController: UIViewController {
 
             let work: () -> Void = {
                 // real foreground (skip may still be on-screen)
-                guard let front = self.containerStack.last(where:{ $0.wrapper !== skip })
+                guard let front = self.containerStack.last(where:{ $0.container !== skip })
                 else { return }
 
-                front.wrapper.transform = .identity
-                front.wrapper.alpha     = 1
+                front.container.transform = .identity
+                front.container.alpha     = 1
                 front.dimView.alpha     = 0
 
-                var refTop = front.wrapper.frame.minY
+                var refTop = front.container.frame.minY
                 var depth  = 1
 
                 for c in self.containerStack.reversed() {
-                    if c.wrapper === skip || c.wrapper === front.wrapper { continue }
+                    if c.container === skip || c.container === front.container { continue }
                     let scale = 1 - CGFloat(depth)*0.05
-                    let halfScaled = c.wrapper.bounds.height*scale/2
+                    let halfScaled = c.container.bounds.height*scale/2
                     let targetTop  = refTop - self.options.stackVerticalSpacing
-                    let ty = targetTop + halfScaled - c.wrapper.center.y
-                    c.wrapper.transform =
+                    let ty = targetTop + halfScaled - c.container.center.y
+                    c.container.transform =
                         .init(translationX:0, y:ty).scaledBy(x:scale, y:scale)
-                    c.wrapper.alpha = depth <= self.options.maxVisibleStack ? 1 : 0
-                    c.dimView.alpha = self.options.dimOpacityMultiplier*CGFloat(depth)
+                    c.container.alpha = depth <= self.options.maxVisibleStack ? 1 : 0
+                    c.container.alpha = self.options.dimOpacityMultiplier*CGFloat(depth)
                     refTop = targetTop
                     depth += 1
                 }
@@ -545,7 +546,7 @@ public final class ModalViewController: UIViewController {
     private func updateSnapshots(newFront frontWrapper: UIView?) {
         guard options.usesSnapshots else { return }
         for idx in 0..<containerStack.count {
-            if containerStack[idx].wrapper === frontWrapper {
+            if containerStack[idx].container === frontWrapper {
                 restoreLiveView(&containerStack[idx])
             } else {
                 makeSnapshot(&containerStack[idx])
@@ -651,7 +652,7 @@ public final class ModalViewController: UIViewController {
     private func clearAll(){
         overlay.removeFromSuperview()
         containerStack.forEach {
-            $0.wrapper.removeFromSuperview()
+            $0.container.removeFromSuperview()
             $0.modalView.removeFromParent()
         }
         containerStack.removeAll()
@@ -671,15 +672,21 @@ public final class ModalViewController: UIViewController {
     private func makeContainer(for modal: ModalView, sticky explicit: StickyElementsContainer.Type?) -> Container {
         addChild(modal)
         
+        let container = UIView()
+        container.layer.cornerRadius = options.cornerRadius
+        let s = options.cardShadow
+        container.layer.shadowColor = s.color.cgColor
+        container.layer.shadowOpacity = s.opacity
+        container.layer.shadowRadius = s.radius
+        container.layer.shadowOffset = s.offset
+        container.layer.maskedCorners = options.cornerMask
+        container.clipsToBounds = false
+        
         let wrapper = UIView()
         wrapper.layer.cornerRadius = options.cornerRadius
-        let s = options.cardShadow
-        wrapper.layer.shadowColor = s.color.cgColor
-        wrapper.layer.shadowOpacity = s.opacity
-        wrapper.layer.shadowRadius = s.radius
-        wrapper.layer.shadowOffset = s.offset
         wrapper.layer.maskedCorners = options.cornerMask
-        wrapper.clipsToBounds = false
+        wrapper.clipsToBounds = true
+        container.addSubview(wrapper)
 
         // card (clips content)
         let card = UIView()
@@ -698,7 +705,7 @@ public final class ModalViewController: UIViewController {
         
         // sticky elements
         let sticky = (explicit != nil) ? explicit!.init(modalVC: self) : StickyElementsContainer(modalVC: self)
-        sticky.wrapper = wrapper
+        sticky.wrapper = container
         sticky.layer.cornerRadius = options.cornerRadius
         sticky.layer.maskedCorners = options.cornerMask
         sticky.clipsToBounds = true
@@ -755,10 +762,11 @@ public final class ModalViewController: UIViewController {
         ])
 
         return Container(wrapper: wrapper,
-                         card:    card,
+                         card: card,
+                         container: container,
                          modalView: modal,
                          dimView: dim,
-                         sticky:  sticky)
+                         sticky: sticky)
     }
 }
 
@@ -771,7 +779,7 @@ extension ModalViewController: ModalInteractionDelegate {
         containerStack.last?.modalView.canDismiss ?? true
     }
     func interactionPrimaryContainer(_ _:ModalInteractionController) -> UIView? {
-        containerStack.last?.wrapper
+        containerStack.last?.container
     }
     func interactionAnimationSettings(_ _:ModalInteractionController) -> ModalAnimationSettings {
         options.animation
