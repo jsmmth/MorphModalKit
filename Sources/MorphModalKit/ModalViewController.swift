@@ -736,14 +736,13 @@ public final class ModalViewController: UIViewController {
             modalContainer.layer.maskedCorners = cornerMasks
         }
         modalContainer.clipsToBounds = true
-        
+        card.addSubview(modalContainer)
         NSLayoutConstraint.activate([
             modalContainer.leadingAnchor.constraint(equalTo: card.leadingAnchor),
             modalContainer.trailingAnchor.constraint(equalTo: card.trailingAnchor),
             modalContainer.topAnchor.constraint(equalTo: card.topAnchor),
             modalContainer.bottomAnchor.constraint(equalTo: card.bottomAnchor)
         ])
-        card.addSubview(modalContainer)
         
         modal.view.translatesAutoresizingMaskIntoConstraints = false
         modalContainer.addSubview(modal.view)
