@@ -19,10 +19,18 @@ protocol ModalInteractionDelegate: AnyObject {
 // MARK: - Controller
 @MainActor
 final class ModalInteractionController: NSObject {
+    
     func attach(to host: UIView, delegate: ModalInteractionDelegate) {
         hostView = host
         self.delegate = delegate
-        host.addGestureRecognizer(sheetPan)
+        let g = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
+        g.delegate = self
+        host.addGestureRecognizer(g)
+        sheetPan = g
+    }
+    
+    func setGestureEnabled(_ enabled: Bool) {
+        sheetPan?.isEnabled = enabled
     }
 
     func bindDismissScrollView(_ scroll: UIScrollView?) {
@@ -36,13 +44,9 @@ final class ModalInteractionController: NSObject {
     private weak var boundScrollView: UIScrollView?
     private let dismissDistance: CGFloat = 300
     private let parallaxFactor : CGFloat = 0.08
-    private lazy var sheetPan: UIPanGestureRecognizer = {
-        let g = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
-        g.delegate = self
-        return g
-    }()
     private var startT: CGAffineTransform = .identity
     private var bgStartTransforms : [UIView : CGAffineTransform] = [:]
+    private(set) var sheetPan: UIPanGestureRecognizer!
     private var spring: ModalAnimationSettings {
         delegate?.interactionAnimationSettings(self) ?? .init()
     }

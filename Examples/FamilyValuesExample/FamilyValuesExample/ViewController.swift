@@ -1,8 +1,8 @@
 //
 //  ViewController.swift
-//  UIKitExample
+//  FamilyValuesExample
 //
-//  Created by Joseph Smith on 05/07/2025.
+//  Created by Joseph Smith on 26/07/2025.
 //
 
 import UIKit
@@ -17,7 +17,7 @@ private extension UIButton {
       cfg.title = title
       cfg.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
         var out = incoming
-        out.font = .rounded(ofSize: 15, weight: .bold)
+        out.font = .systemFont(ofSize: 15, weight: .bold)
         out.foregroundColor = textColor
         return out
       }
@@ -64,19 +64,11 @@ class ViewController: UIViewController {
     
     @objc private func onPresentPress() {
         var options: ModalOptions = ModalOptions.default
-        
-        options.enableGlass = true
-        
-        // Example, full width modal
-        // options.horizontalInset = 0
-        // options.bottomSpacing = 0
-        // options.cornerMask = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        
-        // We pass the elements we want to be sticky through morphs when we present the modal
-        // these can be inherited (default) by future pushes or overwritten
-        // we pass the sticky elements here although we don't show them until the MorphModal (see StickyElements)
-        // this is so we can animate in via fade when we replace MenuModal with MorphModal
-        self.presentModal(MenuModal(), options: options, sticky: .sticky(StickyElements.self))
+        options.cornerRadius = 46
+        options.showsHandle = false
+        options.morphAnimation.duration = 0.3
+        options.animation.duration = 0.45
+        self.presentModal(ContentOne(), options: options, sticky: .sticky(StickyElements.self))
     }
 }
 

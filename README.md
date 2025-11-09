@@ -4,6 +4,8 @@
 
 MorphModalKit is a lightweight, flexible UIKit package for building card-stack modals with smooth “morph” (replace) animations and support for sticky elements. It provides a blank-canvas container—feel free to use your own views and components.
 
+If you are looking to use SwiftUI you can checkout the [SwiftUI docs](./SwiftUI.md) although this SwiftUI implementation is experimental and for a more stable approach I'd recommend using UIKit for this modal system.
+
 <p align="center">
   <img width="100%" src="./example.gif" alt="MorphModalKit">
 </p>
@@ -72,10 +74,10 @@ public protocol ModalView: UIViewController {
   var dismissalHandlingScrollView: UIScrollView? { get }
 
   // Optional lifecycle hooks
-  func modalWillAppear()
-  func modalDidAppear()
-  func modalWillDisappear()
-  func modalDidDisappear()
+  func modalWillAppear(fromReplaced: Bool)
+  func modalDidAppear(fromReplaced: Bool)
+  func modalWillDisappear(beingReplaced: Bool)
+  func modalDidDisappear(beingReplaced: Bool)
 }
 ```
 
@@ -220,7 +222,7 @@ presentModal(MyModal(), options: opts, sticky: MySticky.self)
 - **Performance**: Background cards snapshot themselves for smooth animations. Disable via `options.usesSnapshots = false`.
 - **Keyboard Avoidance**: The stack re-layouts on keyboard frame changes, maintaining `keyboardSpacing`.
 - **Scroll-to-Dismiss**: Return your scroll view in `dismissalHandlingScrollView`, helpful when wrapping content in a `UIScrollView` or subclass.
-- **Disable Dismissal**: Override `var canDismiss: Bool { false }` in your `ModalView` You'll still be able to programatically call `.pop`'.
+- **Disable Dismissal**: Override `var canDismiss: Bool { false }` in your `ModalView` You'll still be able to programmatically call `.pop`'.
 
 ---
 

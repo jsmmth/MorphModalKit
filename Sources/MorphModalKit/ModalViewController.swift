@@ -36,11 +36,14 @@ public struct ModalOptions {
     // layout
     public var horizontalInset: CGFloat = 10
     public var cornerRadius: CGFloat = 32
+    public var innerCornerRadius: CGFloat? = nil
     public var stackVerticalSpacing: CGFloat = 20
     public var bottomSpacing: CGFloat? = nil
     public var keyboardSpacing: CGFloat = 10
     public var centerOnIpad: Bool = true
     public var centerIPadWidthMultiplier: CGFloat = 0.7
+    public var handlebarHeight: CGFloat = 4
+    public var handlebarWidth: CGFloat = 52
 
     // background dimming
     public var dimBackgroundColor: UIColor = .black
@@ -56,6 +59,7 @@ public struct ModalOptions {
         .layerMinXMinYCorner, .layerMaxXMinYCorner,
         .layerMinXMaxYCorner, .layerMaxXMaxYCorner
     ]
+    public var innerCornerMask: CACornerMask? = nil
     public var showsHandle: Bool = true
     public var handleColor: UIColor = .tertiarySystemGroupedBackground
     public var enableGlass: Bool = false /// for iOS 26 only
@@ -94,11 +98,20 @@ public final class ModalViewController: UIViewController {
         _ modal:ModalView,
         options: ModalOptions = ModalOptions.default,
         sticky: StickyOption = .none,
-        animated:Bool = true,
-        showsOverlay:Bool = true,
+        animated: Bool = true,
+        showsOverlay: Bool = true,
+        dismissableFromOutsideTaps: Bool = true,
+        passThroughTouches: Bool = false,
         completion:(()->Void)? = nil) {
             self.options = options
             overlayEnabled = showsOverlay
+            self.passThroughTouches = passThroughTouches
+            dismissFromOverlayTaps = dismissableFromOutsideTaps && !passThroughTouches
+            
+            overlay.isUserInteractionEnabled = dismissFromOverlayTaps
+            overlay.backgroundColor = overlayEnabled ? options.overlayColor : .clear
+            
+            interaction.setGestureEnabled(modal.isDraggable)
             
             if containerStack.isEmpty {
                 push(modal,
@@ -108,6 +121,7 @@ public final class ModalViewController: UIViewController {
                      completion:completion)
                 return
             }
+            
             hide(completion: {
                 self.push(modal,
                           options: options,
@@ -134,7 +148,7 @@ public final class ModalViewController: UIViewController {
         let options = options ?? self.options
         
         // bring overlay if this is the first card
-        if overlayEnabled && containerStack.isEmpty {
+        if containerStack.isEmpty {
             overlay.alpha = 0
             view.insertSubview(overlay, at: 0)
             overlay.frame = view.bounds
@@ -167,14 +181,15 @@ public final class ModalViewController: UIViewController {
         refreshScrollDismissBinding()
         let previous = containerStack.dropLast().last?.modalView
         notifyStickyOwnerChange(old: previous, animated: false)
-        modal.modalWillAppear()
+        modal.modalWillAppear(fromReplace: false)
         animate(options.animation, animated) {
-            self.overlay.alpha = self.overlayEnabled ? self.options.overlayOpacity : 0
+            self.overlay.alpha = self.options.overlayOpacity
             self.layoutAll()
             c.wrapper.transform = .identity
             self.applyPeekTransforms(animated:true)
+            self.interaction.setGestureEnabled(modal.isDraggable)
         } completion:{
-            modal.modalDidAppear()
+            modal.modalDidAppear(fromReplace: false)
             completion?()
         }
     }
@@ -197,8 +212,8 @@ public final class ModalViewController: UIViewController {
         let dist  = view.bounds.maxY - removing.wrapper.frame.minY + 50
         let slide = removing.wrapper.transform.translatedBy(x:0,y:dist)
         let next = containerStack[containerStack.count-2]
-        removing.modalView.modalWillDisappear()
-        next.modalView.modalWillAppear()
+        removing.modalView.modalWillDisappear(beingReplaced: false)
+        next.modalView.modalWillAppear(fromReplace: false)
         restoreLiveView(&containerStack[containerStack.count-2])// next
         
         animate(options.animation, animated) {
@@ -207,8 +222,9 @@ public final class ModalViewController: UIViewController {
         } completion:{
             self.containerStack.removeLast()
             removing.wrapper.removeFromSuperview()
-            removing.modalView.modalDidDisappear()
-            next.modalView.modalDidAppear()
+            removing.modalView.modalDidDisappear(beingReplaced: false)
+            next.modalView.modalDidAppear(fromReplace: false)
+            self.interaction.setGestureEnabled(next.modalView.isDraggable)
             self.refreshScrollDismissBinding()
             self.isTransitioning = false
             completion?()
@@ -261,8 +277,8 @@ public final class ModalViewController: UIViewController {
         c.modalView = modal
         containerStack[containerStack.count - 1] = c
         refreshScrollDismissBinding()
-        outgoing.modalWillDisappear()
-        modal.modalWillAppear()
+        outgoing.modalWillDisappear(beingReplaced: true)
+        modal.modalWillAppear(fromReplace: true)
         card.layoutIfNeeded()
         
         let slideAmount = (animation == .scale) ? 0 : ( { if case let .slide(px) = animation { return px } ; return 0 }() )
@@ -296,12 +312,13 @@ public final class ModalViewController: UIViewController {
             }
             self.applyPeekTransforms(animated: true)
             self.notifyStickyOwnerChange(old: outgoing, animated: false)
+            self.interaction.setGestureEnabled(modal.isDraggable)
         } completion: {
             old.removeFromSuperview()
             outgoing.view.removeFromSuperview()
             outgoing.removeFromParent()
-            outgoing.modalDidDisappear()
-            modal.modalDidAppear()
+            outgoing.modalDidDisappear(beingReplaced: true)
+            modal.modalDidAppear(fromReplace: true)
             completion?()
         }
     }
@@ -314,7 +331,7 @@ public final class ModalViewController: UIViewController {
     public func hide(animated:Bool = true, completion:(()->Void)? = nil) {
         guard !isTransitioning else { return }
         isTransitioning = true
-        containerStack.forEach{ $0.modalView.modalWillDisappear() }
+        containerStack.forEach{ $0.modalView.modalWillDisappear(beingReplaced: false) }
         animate(options.animation, animated) {
             self.overlay.alpha = 0
             self.containerStack.forEach{
@@ -328,24 +345,64 @@ public final class ModalViewController: UIViewController {
             completion?()
         }
     }
+    
+    /// Sets the height of the top-most modal and animates the size change.
+    /// - Parameters:
+    ///   - height: Desired content height. Pass `nil` to return to the modal's preferred height.
+    ///   - animated: Whether to animate the change.
+    ///   - reservePeekSpace: If `true`, we still reserve vertical space for the peek stack (same rule as layout).
+    public func setTopModalHeight(
+        _ height: CGFloat?,
+        animated: Bool = true,
+        reservePeekSpace: Bool = true
+    ) {
+        guard !isTransitioning, !containerStack.isEmpty else { return }
+        containerStack[containerStack.count - 1].overrideHeight = height
+
+        animate(options.animation, animated) {
+            self.layoutAll()
+            self.applyPeekTransforms(animated: true)
+        }
+    }
+    
+    /// Sets the height of a specific modal
+    /// - Parameters:
+    ///   - for: The modal view you want to adjust the height for
+    ///   - to: Desired content height. Pass `nil` to return to the modal's preferred height.
+    ///   - animated: Whether to animate the change.
+    public func setHeight(
+        for modal: ModalView,
+        to height: CGFloat?,
+        animated: Bool = true
+    ) {
+        guard let idx = containerStack.firstIndex(where: { $0.modalView === modal }) else { return }
+        containerStack[idx].overrideHeight = height
+        animate(options.animation, animated) {
+            self.layoutAll()
+            self.applyPeekTransforms(animated: true)
+        }
+    }
 
     // MARK: - Internals
     @MainActor
-    private struct Container {
+    struct Container {
         let wrapper: UIView
         let card: UIView
         var modalView: ModalView
         var dimView = UIView()
         var snapshot: UIView? = nil
         var sticky: StickyElementsContainer
+        var overrideHeight: CGFloat? = nil
     }
     
     private var isTransitioning: Bool = false
-    private var containerStack: [Container] = []
+    private(set) var containerStack: [Container] = []
     let interaction = ModalInteractionController()
     private var kbdHeight: CGFloat = 0
     private var overlayEnabled: Bool = true
     private var keyboardHeight: CGFloat = 0
+    private var dismissFromOverlayTaps: Bool = true
+    private(set) var passThroughTouches: Bool = false
 
     // overlay backdrop
     private lazy var overlay: UIView = {
@@ -364,6 +421,12 @@ public final class ModalViewController: UIViewController {
         registerKeyboard()
         overlay.addGestureRecognizer(
             UITapGestureRecognizer(target: self, action: #selector(onOverlayTap)))
+    }
+    
+    public override func loadView() {
+        let v = PossiblePassThroughView()
+        v.modalVC = self
+        self.view = v
     }
     
     deinit {
@@ -387,16 +450,16 @@ public final class ModalViewController: UIViewController {
     private func clampedHeight(
         for modal: ModalView,
         width: CGFloat,
-        reservePeekSpace: Bool = true) -> CGFloat
-    {
-        var h = modal.preferredHeight(for: width)
+        reservePeekSpace: Bool = true,
+        overrideHeight: CGFloat? = nil
+    ) -> CGFloat {
+        let requested = overrideHeight ?? modal.preferredHeight(for: width)
         let top = view.safeAreaInsets.top
         let bot = options.bottomSpacing ?? max(view.safeAreaInsets.bottom, 10)
-        let kb = keyboardHeight > 0 ? keyboardHeight + options.keyboardSpacing : 0
-        let peek = reservePeekSpace
-        ? options.stackVerticalSpacing * CGFloat(min(4, options.maxVisibleStack)) : 0
+        let kb  = keyboardHeight > 0 ? keyboardHeight + options.keyboardSpacing : 0
+        let peek = reservePeekSpace ? options.stackVerticalSpacing * CGFloat(min(4, options.maxVisibleStack)) : 0
         let maxH = view.bounds.height - top - bot - kb - peek
-        return min(h, maxH)
+        return min(requested, maxH)
     }
 
     private var availableWidth: CGFloat {
@@ -410,7 +473,7 @@ public final class ModalViewController: UIViewController {
     /// Re-computes size/position for one container and everything it owns.
     private func layout(_ c: inout Container) {
         let width  = availableWidth
-        let height = clampedHeight(for: c.modalView, width: width)
+        let height = clampedHeight(for: c.modalView, width: width, overrideHeight: c.overrideHeight)
         c.wrapper.bounds.size = .init(width: width, height: height)
         
         let kbReserve = keyboardHeight > 0 ? keyboardHeight + options.keyboardSpacing : 0
@@ -511,7 +574,8 @@ public final class ModalViewController: UIViewController {
 
     // MARK: Utils
     @objc private func onOverlayTap(_ g:UITapGestureRecognizer){
-        guard g.state == .ended,
+        guard dismissFromOverlayTaps,
+              g.state == .ended,
               containerStack.last?.modalView.canDismiss ?? true else { return }
         hide()
     }
@@ -550,7 +614,7 @@ public final class ModalViewController: UIViewController {
     }
     
     @objc private func handleKeyboard(_ n: Notification) {
-        if let frame = n.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+        if let _ = n.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
             var rawHeight: CGFloat = 0
             if let frame = n.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
                 rawHeight = frame.height - view.safeAreaInsets.bottom
@@ -596,8 +660,15 @@ public final class ModalViewController: UIViewController {
         containerStack.removeAll()
         updateHitTesting()
         
-        guard options.removesSelfWhenCleared else { return }
-        self.dismiss(animated: false)
+        if options.removesSelfWhenCleared {
+            if parent != nil {
+                willMove(toParent: nil)
+                view.removeFromSuperview()
+                removeFromParent()
+            } else {
+                dismiss(animated: false)
+            }
+        }
     }
 
     private func makeContainer(for modal: ModalView, sticky explicit: StickyElementsContainer.Type?) -> Container {
@@ -612,19 +683,6 @@ public final class ModalViewController: UIViewController {
         wrapper.layer.shadowOffset = s.offset
         wrapper.layer.maskedCorners = options.cornerMask
         wrapper.clipsToBounds = false
-        
-        if options.enableGlass, #available(iOS 26.0, *) {
-            wrapper.backgroundColor = .clear
-            let glass = UIGlassEffect()
-            let glassView = UIVisualEffectView(effect: glass)
-            glassView.frame = wrapper.bounds
-            glassView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            glassView.layer.cornerRadius = options.cornerRadius
-            glassView.layer.maskedCorners = options.cornerMask
-            wrapper.insertSubview(glassView, at: 0)
-        } else {
-            wrapper.backgroundColor = options.modalBackgroundColor
-        }
 
         // card (clips content)
         let card = UIView()
@@ -659,25 +717,54 @@ public final class ModalViewController: UIViewController {
             let handle = UIView()
             handle.backgroundColor = options.handleColor
             handle.layer.cornerCurve = .continuous
-            handle.layer.cornerRadius = 2
+            handle.layer.cornerRadius = options.handlebarHeight / 2
             handle.translatesAutoresizingMaskIntoConstraints = false
             wrapper.addSubview(handle)
             NSLayoutConstraint.activate([
-                handle.widthAnchor.constraint(equalToConstant: 52),
-                handle.heightAnchor.constraint(equalToConstant: 4),
+                handle.widthAnchor.constraint(equalToConstant: options.handlebarWidth),
+                handle.heightAnchor.constraint(equalToConstant: options.handlebarHeight),
                 handle.topAnchor.constraint(equalTo: wrapper.topAnchor, constant: 8),
                 handle.centerXAnchor.constraint(equalTo: wrapper.centerXAnchor),
             ])
         }
 
         // live content
-        modal.view.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(modal.view)
+        let modalContainer = UIView()
+        
+        if options.enableGlass, #available(iOS 26.0, *) {
+            modalContainer.backgroundColor = .clear
+            let glass = UIGlassEffect()
+            let glassView = UIVisualEffectView(effect: glass)
+            glassView.frame = modalContainer.bounds
+            glassView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            glassView.layer.cornerRadius = options.cornerRadius
+            glassView.layer.maskedCorners = options.cornerMask
+            modalContainer.insertSubview(glassView, at: 0)
+        } else {
+            modalContainer.backgroundColor = options.modalBackgroundColor
+        }
+
+        modalContainer.translatesAutoresizingMaskIntoConstraints = false
+        modalContainer.layer.cornerRadius = options.innerCornerRadius ?? .zero
+        if let cornerMasks = options.innerCornerMask {
+            modalContainer.layer.maskedCorners = cornerMasks
+        }
+        modalContainer.clipsToBounds = true
+        card.addSubview(modalContainer)
         NSLayoutConstraint.activate([
-            modal.view.leadingAnchor.constraint(equalTo: card.leadingAnchor),
-            modal.view.trailingAnchor.constraint(equalTo: card.trailingAnchor),
-            modal.view.topAnchor.constraint(equalTo: card.topAnchor),
-            modal.view.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+            modalContainer.leadingAnchor.constraint(equalTo: card.leadingAnchor),
+            modalContainer.trailingAnchor.constraint(equalTo: card.trailingAnchor),
+            modalContainer.topAnchor.constraint(equalTo: card.topAnchor),
+            modalContainer.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+        ])
+        
+        modal.view.translatesAutoresizingMaskIntoConstraints = false
+        modalContainer.addSubview(modal.view)
+        NSLayoutConstraint.activate([
+            modal.view.leadingAnchor.constraint(equalTo: modalContainer.leadingAnchor),
+            modal.view.trailingAnchor.constraint(equalTo: modalContainer.trailingAnchor),
+            modal.view.topAnchor.constraint(equalTo: modalContainer.topAnchor),
+            modal.view.bottomAnchor.constraint(equalTo: modalContainer.bottomAnchor)
         ])
         modal.didMove(toParent: self)
 
