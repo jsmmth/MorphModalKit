@@ -206,8 +206,8 @@ Customize every aspect via `ModalOptions`:
 | `showsHandle`              | Show drag-handle when dismissable                                           | `true`                            |
 | `handleColor`              | Color of the drag-handle                                                    | `.tertiarySystemGroupedBackground` |
 | `enableGlass`              | Enables liquid glass background effect (iOS 26 only)                        | `false`                           |
-| `glassStyle`               | When enableGlass is true allows you to change glass style (iOS 26 only)     | `false`                           |
-| `centerOnIpad`             | Whether ot not the modal should be centered on iPad or not                  | `true`                          |
+| `glassStyle`               | When enableGlass is true allows you to change glass style (iOS 26 only)     | `.regular`                        |
+| `centerOnIpad`             | Whether ot not the modal should be centered on iPad or not                  | `true`                            |
 | `centerIPadWidthMultiplier`| Width of the modal when centered on iPad                                    | `0.7`                             |
 
 **Example: Full-width, bottom-pinned modal**
