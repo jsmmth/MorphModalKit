@@ -42,6 +42,8 @@ public struct ModalOptions {
     public var keyboardSpacing: CGFloat = 10
     public var centerOnIpad: Bool = true
     public var centerIPadWidthMultiplier: CGFloat = 0.7
+    public var handlebarHeight: CGFloat = 4
+    public var handlebarWidth: CGFloat = 52
 
     // background dimming
     public var dimBackgroundColor: UIColor = .black
@@ -722,12 +724,12 @@ public final class ModalViewController: UIViewController {
             let handle = UIView()
             handle.backgroundColor = options.handleColor
             handle.layer.cornerCurve = .continuous
-            handle.layer.cornerRadius = 2
+            handle.layer.cornerRadius = options.handlebarHeight / 2
             handle.translatesAutoresizingMaskIntoConstraints = false
             wrapper.addSubview(handle)
             NSLayoutConstraint.activate([
-                handle.widthAnchor.constraint(equalToConstant: 52),
-                handle.heightAnchor.constraint(equalToConstant: 4),
+                handle.widthAnchor.constraint(equalToConstant: options.handlebarWidth),
+                handle.heightAnchor.constraint(equalToConstant: options.handlebarHeight),
                 handle.topAnchor.constraint(equalTo: wrapper.topAnchor, constant: 8),
                 handle.centerXAnchor.constraint(equalTo: wrapper.centerXAnchor),
             ])
