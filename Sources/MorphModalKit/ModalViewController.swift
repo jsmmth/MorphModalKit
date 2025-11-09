@@ -274,13 +274,6 @@ public final class ModalViewController: UIViewController {
         ])
         modal.didMove(toParent: self)
         c.modalView = modal
-        c.modalView.view.backgroundColor = options.modalBackgroundColor
-        c.modalView.view.layer.cornerRadius = options.innerCornerRadius ?? .zero
-        c.modalView.view.clipsToBounds = true
-        if let cornerMasks = options.innerCornerMask {
-            c.modalView.view.layer.maskedCorners = cornerMasks
-        }
-        
         containerStack[containerStack.count - 1] = c
         refreshScrollDismissBinding()
         outgoing.modalWillDisappear(beingReplaced: true)
@@ -735,22 +728,31 @@ public final class ModalViewController: UIViewController {
         }
 
         // live content
-        modal.view.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(modal.view)
-        modal.view.backgroundColor = options.modalBackgroundColor
-        modal.view.layer.cornerRadius = options.innerCornerRadius ?? .zero
-        modal.view.clipsToBounds = true
+        let modalContainer = UIView()
+        modalContainer.backgroundColor = options.modalBackgroundColor
+        modalContainer.translatesAutoresizingMaskIntoConstraints = false
+        modalContainer.layer.cornerRadius = options.innerCornerRadius ?? .zero
         if let cornerMasks = options.innerCornerMask {
-            modal.view.layer.maskedCorners = cornerMasks
+            modalContainer.layer.maskedCorners = cornerMasks
         }
+        modalContainer.clipsToBounds = true
         
         NSLayoutConstraint.activate([
-            modal.view.leadingAnchor.constraint(equalTo: card.leadingAnchor),
-            modal.view.trailingAnchor.constraint(equalTo: card.trailingAnchor),
-            modal.view.topAnchor.constraint(equalTo: card.topAnchor),
-            modal.view.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+            modalContainer.leadingAnchor.constraint(equalTo: card.leadingAnchor),
+            modalContainer.trailingAnchor.constraint(equalTo: card.trailingAnchor),
+            modalContainer.topAnchor.constraint(equalTo: card.topAnchor),
+            modalContainer.bottomAnchor.constraint(equalTo: card.bottomAnchor)
         ])
+        card.addSubview(modalContainer)
         
+        modal.view.translatesAutoresizingMaskIntoConstraints = false
+        modalContainer.addSubview(modal.view)
+        NSLayoutConstraint.activate([
+            modal.view.leadingAnchor.constraint(equalTo: modalContainer.leadingAnchor),
+            modal.view.trailingAnchor.constraint(equalTo: modalContainer.trailingAnchor),
+            modal.view.topAnchor.constraint(equalTo: modalContainer.topAnchor),
+            modal.view.bottomAnchor.constraint(equalTo: modalContainer.bottomAnchor)
+        ])
         modal.didMove(toParent: self)
 
         // dim overlay
