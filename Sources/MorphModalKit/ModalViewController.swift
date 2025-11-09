@@ -685,9 +685,8 @@ public final class ModalViewController: UIViewController {
 
         // card (clips content)
         let card = UIView()
-        card.layer.cornerRadius = options.innerCornerRadius ?? options.cornerRadius
-        card.layer.maskedCorners = options.innerCornerMask ?? options.cornerMask
-        card.backgroundColor = options.modalBackgroundColor
+        card.layer.cornerRadius = options.cornerRadius
+        card.layer.maskedCorners = options.cornerMask
         card.clipsToBounds = true
         wrapper.addSubview(card)
         card.translatesAutoresizingMaskIntoConstraints = false
@@ -731,12 +730,20 @@ public final class ModalViewController: UIViewController {
         // live content
         modal.view.translatesAutoresizingMaskIntoConstraints = false
         card.addSubview(modal.view)
+        modal.view.backgroundColor = options.modalBackgroundColor
+        modal.view.layer.cornerRadius = options.innerCornerRadius ?? .zero
+        modal.view.clipsToBounds = true
+        if let cornerMasks = options.innerCornerMask {
+            modal.view.layer.maskedCorners = cornerMasks
+        }
+        
         NSLayoutConstraint.activate([
             modal.view.leadingAnchor.constraint(equalTo: card.leadingAnchor),
             modal.view.trailingAnchor.constraint(equalTo: card.trailingAnchor),
             modal.view.topAnchor.constraint(equalTo: card.topAnchor),
             modal.view.bottomAnchor.constraint(equalTo: card.bottomAnchor)
         ])
+        
         modal.didMove(toParent: self)
 
         // dim overlay
