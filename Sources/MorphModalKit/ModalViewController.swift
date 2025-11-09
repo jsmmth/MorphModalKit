@@ -274,6 +274,13 @@ public final class ModalViewController: UIViewController {
         ])
         modal.didMove(toParent: self)
         c.modalView = modal
+        c.modalView.view.backgroundColor = options.modalBackgroundColor
+        c.modalView.view.layer.cornerRadius = options.innerCornerRadius ?? .zero
+        c.modalView.view.clipsToBounds = true
+        if let cornerMasks = options.innerCornerMask {
+            c.modalView.view.layer.maskedCorners = cornerMasks
+        }
+        
         containerStack[containerStack.count - 1] = c
         refreshScrollDismissBinding()
         outgoing.modalWillDisappear(beingReplaced: true)
