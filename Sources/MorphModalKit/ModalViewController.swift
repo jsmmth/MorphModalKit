@@ -790,13 +790,13 @@ public final class ModalViewController: UIViewController {
         dim.layer.cornerRadius = options.cornerRadius
         dim.layer.maskedCorners = options.cornerMask
         dim.clipsToBounds = true
-        wrapper.addSubview(dim)
+        modalContainer.addSubview(dim)
         dim.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            dim.leadingAnchor.constraint(equalTo: wrapper.leadingAnchor),
-            dim.trailingAnchor.constraint(equalTo: wrapper.trailingAnchor),
-            dim.topAnchor.constraint(equalTo: wrapper.topAnchor),
-            dim.bottomAnchor.constraint(equalTo: wrapper.bottomAnchor)
+            dim.leadingAnchor.constraint(equalTo: modalContainer.leadingAnchor),
+            dim.trailingAnchor.constraint(equalTo: modalContainer.trailingAnchor),
+            dim.topAnchor.constraint(equalTo: modalContainer.topAnchor),
+            dim.bottomAnchor.constraint(equalTo: modalContainer.bottomAnchor)
         ])
 
         return Container(wrapper: wrapper,
