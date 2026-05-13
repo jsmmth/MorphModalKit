@@ -45,6 +45,11 @@ public enum ModalGlassStyle {
     }
 }
 
+public enum OverlayTapBehavior {
+    case dismissAll
+    case popTop
+}
+
 public struct ModalOptions {
     // layout
     public var horizontalInset: CGFloat = 10
@@ -81,6 +86,7 @@ public struct ModalOptions {
     // behavior
     public var usesSnapshots: Bool = true
     public var usesSnapshotsForMorph: Bool = false
+    public var overlayTapBehavior: OverlayTapBehavior = .dismissAll
 
     // animations
     public var animation: ModalAnimationSettings = .init()
@@ -591,7 +597,10 @@ public final class ModalViewController: UIViewController {
         guard dismissFromOverlayTaps,
               g.state == .ended,
               containerStack.last?.modalView.canDismiss ?? true else { return }
-        hide()
+        switch options.overlayTapBehavior {
+        case .dismissAll: hide()
+        case .popTop:     pop()
+        }
     }
     
     func refreshScrollDismissBinding() {
